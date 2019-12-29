@@ -35,6 +35,9 @@ class User extends CRUD {
   // --------------------------------------------------------- //
   // Validate whole object for user related process
   async validateObj (callFrom, userObj) {
+    // Validate schema
+    userObj = this.schema(userObj)
+
     switch (callFrom) {
       case 'signup':
         // Check for required password vars
