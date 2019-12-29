@@ -2,16 +2,23 @@ const CRUD = require('../../services/CRUD')
 const { RequiredParam, InvalidParam, UniqueConstraint } = require('./../../helpers/error')
 
 class User extends CRUD {
-  constructor (db, schema, encrypt) {
+  constructor (db, schema, encrypt, JWT) {
     // Set all the DB & Schema interface
     super(db, 'users', schema)
     // this.schema = schema
     this.encrypt = encrypt
+    this.token = JWT
   }
 
   // Register / Signup user to the system
   async signup (obj) {
     // Perform validations
+
+    // Check for required username / email
+    const { username, email } = obj
+    if (!username) throw new RequiredParam('Username')
+    if (!email) throw new RequiredParam('Email')
+
     const userObj = await this.validateObj('signup', obj)
 
     // Encrypt password
@@ -32,12 +39,30 @@ class User extends CRUD {
     throw new Error({ ...returnData })
   }
 
+  // Log user in
+  async login (obj) {
+    const { username, password } = obj
+    if (!username) throw new RequiredParam('Username')
+    if (!password) throw new RequiredParam('Password')
+
+    // Check for username
+    const { statusCode, success, data } = await this.findOne({ username, isActive: true })
+    if (!success || statusCode !== 200) throw new Error('Invalid details provided !')
+
+    // Check for password
+    const { password: usrPassword } = data
+    if (!this.encrypt.compareString(password, usrPassword)) throw new Error('Password is invalid !')
+
+    // Generate token
+    const token = this.token.generate(data)
+    if (!token) throw new Error('Error parsing data.')
+
+    return { success, statusCode, token, message: 'User is valid' }
+  }
+
   // --------------------------------------------------------- //
   // Validate whole object for user related process
   async validateObj (callFrom, userObj) {
-    // Validate schema
-    userObj = this.schema(userObj)
-
     switch (callFrom) {
       case 'signup':
         // Check for required password vars
