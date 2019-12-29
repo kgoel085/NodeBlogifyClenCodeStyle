@@ -9,7 +9,7 @@ module.exports = async app => {
   await DbLoader()
   console.log('Database Initialized')
 
-  // init. Express related methods
+  // Init. Express related methods
   await ExpressLoader(app)
   console.log('Express Initialized')
 }
