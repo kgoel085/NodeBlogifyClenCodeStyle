@@ -14,8 +14,12 @@ module.exports = {
   login: async (req, res, nxt) => {
     const userData = req.body
 
-    User.login(userData)
-      .then(result => res.status(result.statusCode).json(result))
-      .catch(err => nxt(err))
+    try {
+      const { success, data } = await User.login(userData)
+      console.log(data, success)
+    } catch (err) {
+      console.log(err)
+      nxt(err)
+    }
   }
 }

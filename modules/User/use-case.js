@@ -2,12 +2,11 @@ const CRUD = require('../../services/CRUD')
 const { RequiredParam, InvalidParam, UniqueConstraint } = require('./../../helpers/error')
 
 class User extends CRUD {
-  constructor (db, schema, encrypt, JWT) {
+  constructor (db, schema, encrypt) {
     // Set all the DB & Schema interface
     super(db, 'users', schema)
     // this.schema = schema
     this.encrypt = encrypt
-    this.token = JWT
   }
 
   // Register / Signup user to the system
@@ -47,17 +46,13 @@ class User extends CRUD {
 
     // Check for username
     const { statusCode, success, data } = await this.findOne({ username, isActive: true })
-    if (!success || statusCode !== 200) throw new Error('Invalid details provided !')
+    if (!success || statusCode !== 200 || !data) throw new Error('User not found !')
 
     // Check for password
     const { password: usrPassword } = data
     if (!this.encrypt.compareString(password, usrPassword)) throw new Error('Password is invalid !')
 
-    // Generate token
-    const token = this.token.generate(data)
-    if (!token) throw new Error('Error parsing data.')
-
-    return { success, statusCode, token, message: 'User is valid' }
+    return { success, statusCode, data, message: 'User is valid' }
   }
 
   // --------------------------------------------------------- //
