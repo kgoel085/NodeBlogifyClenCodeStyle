@@ -14,7 +14,7 @@ const connectDb = async () => {
     await client.connect()
 
     const db = await client.db(DB.DATABASE)
-    db.makeId = makeIdFromString
+    db.makeId = (id) => makeIdFromString(id)
 
     return db
   } catch (err) {
