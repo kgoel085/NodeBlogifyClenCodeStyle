@@ -65,7 +65,7 @@ class User extends CRUD {
 
     // Generate token
     const token = this.generateToken({ _id: data._id })
-    data.tokens = data.tokens.concat(token)
+    // data.tokens = data.tokens.concat(token)
 
     await this.updateOne({ _id: data._id }, { $set: { ...data } })
 
