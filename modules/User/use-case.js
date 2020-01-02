@@ -119,7 +119,7 @@ class User extends CRUD {
   // Generate auth token for current user
   generateToken (data = false) {
     if (!data) return false
-    const token = this.token.generate(data)
+    const token = this.token.generate({}, { subject: data._id.toString() })
     return token
   }
 }
