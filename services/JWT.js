@@ -1,17 +1,14 @@
 const jsonwebtoken = require('jsonwebtoken')
-const { secret } = require('./../config')
+const { secret, expiryTime } = require('./../config')
 
 module.exports = {
   // Generate new token
   generate: (data = {}, options = {
-    expiresIn: '1h'
+    expiresIn: expiryTime
   }) => jsonwebtoken.sign(data, secret, { ...options }),
 
   // Verify token
-  verify: async (data = false) => {
-    const result = await jsonwebtoken.verify(data, secret)
-    return result
-  },
+  verify: (data = false) => jsonwebtoken.verify(data, secret),
 
   // Decode token
   decode: token => jsonwebtoken.decode(token)
