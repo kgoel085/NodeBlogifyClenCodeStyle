@@ -6,6 +6,7 @@ const validateObj = ({
   createdAt = new Date().getTime(),
   modifiedAt = null,
   isActive = true,
+  tokens = [],
   ...OtherInfo
 } = {}) => {
   username = validateString('username', username)
@@ -17,6 +18,7 @@ const validateObj = ({
     createdAt,
     modifiedAt,
     isActive,
+    tokens,
     ...OtherInfo
   }
 }
@@ -29,6 +31,7 @@ const normalizeObj = ({
   isActive,
   confirmPassword,
   password,
+  tokens,
   ...otherInfo
 } = {}) => {
   // username = normalizeString(username)
@@ -41,6 +44,8 @@ const normalizeObj = ({
     createdAt,
     modifiedAt,
     isActive,
+    password,
+    tokens,
     ...otherInfo
   }
 }
