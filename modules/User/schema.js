@@ -27,6 +27,8 @@ const normalizeObj = ({
   createdAt,
   modifiedAt,
   isActive,
+  confirmPassword,
+  password,
   ...otherInfo
 } = {}) => {
   // username = normalizeString(username)
