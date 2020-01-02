@@ -2,11 +2,12 @@ const CRUD = require('../../services/CRUD')
 const { RequiredParam, InvalidParam, UniqueConstraint } = require('./../../helpers/error')
 
 class User extends CRUD {
-  constructor (db, schema, encrypt) {
+  constructor (db, schema, encrypt = null, jwt = null) {
     // Set all the DB & Schema interface
     super(db, 'users', schema)
     // this.schema = schema
     this.encrypt = encrypt
+    this.token = jwt
   }
 
   // Register / Signup user to the system
@@ -21,7 +22,7 @@ class User extends CRUD {
     const userObj = await this.validateObj('signup', obj)
 
     // Encrypt password
-    userObj.password = this.encrypt.makeHash(obj.password)
+    userObj.password = this.encrypt.makeHash(userObj.password)
 
     // Register user with the system
     const { success, statusCode, data } = await this.insert(userObj)
@@ -29,7 +30,9 @@ class User extends CRUD {
 
     // If operation was success
     if (success && data.length === 1) {
-      returnData.data = data[0]
+      const { password, tokens, ...filterDt } = data[0]
+
+      returnData.data = filterDt
       returnData.message = 'Signup was successful'
 
       return returnData
@@ -38,12 +41,8 @@ class User extends CRUD {
     throw new Error({ ...returnData })
   }
 
-  // Log user in
-  async login (obj) {
-    const { username, password } = obj
-    if (!username) throw new RequiredParam('Username')
-    if (!password) throw new RequiredParam('Password')
-
+  // Find user by it's credentials
+  async findByCredentials (username, password) {
     // Check for username
     const { statusCode, success, data } = await this.findOne({ username, isActive: true })
     if (!success || statusCode !== 200 || !data) throw new Error('User not found !')
@@ -53,6 +52,24 @@ class User extends CRUD {
     if (!this.encrypt.compareString(password, usrPassword)) throw new Error('Password is invalid !')
 
     return { success, statusCode, data, message: 'User is valid' }
+  }
+
+  // Log user in
+  async login (obj) {
+    const { username, password } = obj
+    if (!username) throw new RequiredParam('Username')
+    if (!password) throw new RequiredParam('Password')
+
+    const { success, statusCode, data } = await this.findByCredentials(username, password)
+    if (!data || !success || statusCode !== 200) throw new Error('Invalid credentials provided !')
+
+    // Generate token
+    const token = this.generateToken({ _id: data._id })
+    data.tokens = data.tokens.concat(token)
+
+    await this.updateOne({ _id: data._id }, { $set: { ...data } })
+
+    return { success, statusCode, token, msg: 'User verified' }
   }
 
   // --------------------------------------------------------- //
@@ -67,7 +84,6 @@ class User extends CRUD {
         await this.checkUniqueEntry(userObj)
         break
     }
-
     return this.mapSchema(userObj)
   }
 
@@ -98,6 +114,13 @@ class User extends CRUD {
     if (ESuccess && EData) throw new UniqueConstraint('Email already exists')
 
     return true
+  }
+
+  // Generate auth token for current user
+  generateToken (data = false) {
+    if (!data) return false
+    const token = this.token.generate(data)
+    return token
   }
 }
 

@@ -15,10 +15,11 @@ module.exports = {
     const userData = req.body
 
     try {
-      const { success, data } = await User.login(userData)
-      console.log(data, success)
+      // Check for user & generate token
+      const { token, statusCode, success, ...data } = await User.login(userData)
+      if (!success || !token) throw new Error('Error logging in !')
+      return res.status(statusCode).json({ ...data, token, success })
     } catch (err) {
-      console.log(err)
       nxt(err)
     }
   }
