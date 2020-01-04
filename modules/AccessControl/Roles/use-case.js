@@ -1,10 +1,10 @@
-const CRUD = require('../../services/CRUD')
+const CRUD = require('../../../services/CRUD')
 const defaults = require('./defaults')
-const { isArray } = require('../../helpers')
+const { isArray } = require('../../../helpers')
 
 class Role extends CRUD {
   constructor (db, schema) {
-    super(db, 'permissions', schema)
+    super(db, 'roles', schema)
     this.checkDefaults(defaults)
   }
 
@@ -12,9 +12,9 @@ class Role extends CRUD {
     if (!defaults || !isArray(defaults)) return false
 
     // Add the default roles that are not present
-    defaults.forEach(async permission => {
-      const { data } = await this.findOne({ permission })
-      if (!data) await this.insert(this.schema({ permission, createdBy: 'default' }))
+    defaults.forEach(async role => {
+      const { data } = await this.findOne({ role })
+      if (!data) await this.insert(this.schema({ role, createdBy: 'default' }))
     })
   }
 }
