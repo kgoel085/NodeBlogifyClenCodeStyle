@@ -17,7 +17,7 @@ module.exports = {
 
   // Validate String
   validateString: (lbl, val = '', len = 2) => {
-    if (typeof val !== 'string') throw new InvalidParam(lbl)
+    if (!val || typeof val !== 'string') throw new InvalidParam(`${lbl} is invalid`)
     if (val.length < 2) throw new InvalidParam(`${lbl} length should be at least 2 characters`)
 
     return val
