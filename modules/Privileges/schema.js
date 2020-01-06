@@ -1,17 +1,17 @@
 const { isRequired, validateString } = require('../../helpers')
 
 const validateObj = ({
-  permission = isRequired('permission'),
+  privilege = isRequired('privilege'),
   createdBy = isRequired('createdBy'),
   isActive = true,
   createdAt = new Date().getTime(),
   modifiedAt = null,
   ...otherInfo
 } = {}) => {
-  permission = validateString('permission', permission)
+  privilege = validateString('privilege', privilege)
   createdBy = validateString('createdBy', createdBy)
   return {
-    permission,
+    privilege,
     isActive,
     createdAt,
     modifiedAt,
@@ -21,7 +21,7 @@ const validateObj = ({
 }
 
 const normalizeObj = ({
-  permission,
+  privilege,
   isActive,
   createdAt,
   modifiedAt,
@@ -29,7 +29,7 @@ const normalizeObj = ({
   ...otherInfo
 } = {}) => {
   return {
-    permission,
+    privilege,
     isActive,
     createdAt,
     createdBy,

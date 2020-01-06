@@ -9,11 +9,11 @@ class Privilege extends CRUD {
   // Create a privilege
   async createPrivilege (dataObj = {}) {
     const prevObj = this.schema(dataObj) // Validate data
-    const { permission } = prevObj
+    const { privilege } = prevObj
 
     // Check if privilege already exists or not
-    const prvExists = await this.checkPrivilege(permission, true)
-    if (prvExists) throw new UniqueConstraint(`${permission} (permission) already exists !`)
+    const prvExists = await this.checkPrivilege(privilege, true)
+    if (prvExists) throw new UniqueConstraint(`${privilege} (permission) already exists !`)
 
     // Store permission in db
     const result = await this.insert(prevObj)
@@ -21,8 +21,8 @@ class Privilege extends CRUD {
   }
 
   // Check if a privilege exists
-  async checkPrivilege (permission = false, insertCase = true) {
-    const { data } = await this.findOne({ permission })
+  async checkPrivilege (privilege = false, insertCase = true) {
+    const { data } = await this.findOne({ privilege })
     if (data) return true
 
     return false
