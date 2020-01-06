@@ -1,10 +1,15 @@
 const express = require('express')
 const router = express.Router()
 const { hasOwnProperty } = require('./../helpers')
+const { isLoggedIn } = require('./../middlewares')
 
 // User routes
 const UserRoutes = require('./user')
 router.use('/user', UserRoutes)
+
+// Admin routes
+const AdminRoutes = require('./admin')
+router.use('/admin', isLoggedIn, AdminRoutes)
 
 router.get('/', (req, res, nxt) => {
   res.send('Welcome back....!')
