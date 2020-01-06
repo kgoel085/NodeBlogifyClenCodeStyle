@@ -1,22 +1,38 @@
 const CRUD = require('../../services/CRUD')
-const defaults = require('./defaults')
-const { isArray } = require('../../helpers')
+const { UniqueConstraint } = require('./../../helpers/error')
 
-class Role extends CRUD {
+class Privilege extends CRUD {
   constructor (db, schema) {
     super(db, 'permissions', schema)
-    this.checkDefaults(defaults)
   }
 
-  async checkDefaults (defaults = []) {
-    if (!defaults || !isArray(defaults)) return false
+  // Create a privilege
+  async createPrivilege (dataObj = {}) {
+    const prevObj = this.schema(dataObj) // Validate data
+    const { permission } = prevObj
 
-    // Add the default roles that are not present
-    defaults.forEach(async permission => {
-      const { data } = await this.findOne({ permission })
-      if (!data) await this.insert(this.schema({ permission, createdBy: 'default' }))
-    })
+    // Check if privilege already exists or not
+    const prvExists = await this.checkPrivilege(permission, true)
+    if (prvExists) throw new UniqueConstraint(`${permission} (permission) already exists !`)
+
+    // Store permission in db
+    const result = await this.insert(prevObj)
+    return result
+  }
+
+  // Check if a privilege exists
+  async checkPrivilege (permission = false, insertCase = true) {
+    const { data } = await this.findOne({ permission })
+    if (data) return true
+
+    return false
+  }
+
+  // Get privilege by id
+  async getPrivilegeById (id = false) {
+    const result = await this.findById(id)
+    return result
   }
 }
 
-module.exports = Role
+module.exports = Privilege
