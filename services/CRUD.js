@@ -65,6 +65,24 @@ class CRUD {
     }
   }
 
+  // find a single record by it's ID
+  async findById (id = isRequired('id'), opts = {}) {
+    try {
+      const db = await this.db
+      const DbId = db.makeId(id)
+
+      // Check var type
+      if (!DbId || (opts && !isObject(opts))) throw new InvalidParam('Invalid parameters provided')
+
+      const result = await db.collection(this.collection).findOne({ _id: DbId }, opts)
+      // if (!result || result === false) throw new Error('No data found')
+
+      return this._returnResponse(200, false, { data: this.mapSchema(result) })
+    } catch (err) {
+      return this._returnResponse(500, true, err)
+    }
+  }
+
   // find all the records
   async findAll (query, opts = {}) {
     try {

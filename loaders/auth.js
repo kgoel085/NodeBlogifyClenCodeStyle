@@ -9,12 +9,8 @@ module.exports = async app => {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: secret
   }, async (payload, done) => {
-    // Database Object
-    const { makeId } = await UserModel.db
-    const UserId = makeId(payload.sub)
-
     try {
-      const { data: user } = await UserModel.findOne({ _id: UserId })
+      const { data: user } = await UserModel.findById(payload.sub)
       if (!user) done(null, false)
 
       done(null, user)

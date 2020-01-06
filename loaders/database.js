@@ -2,7 +2,7 @@ const mongodb = require('mongodb')
 const { DB } = require('./../config')
 
 const makeIdFromString = id => {
-  return new mongodb.ObjectID(id)
+  return new mongodb.ObjectID(id.toString())
 }
 
 const connectDb = async () => {
