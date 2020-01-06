@@ -11,7 +11,10 @@ class AccessRules extends CRUD {
   // Create role rule
   async createRule (dataObj = {}) {
     const roleObj = this.schema(dataObj) // Validate object
-    const { permission } = roleObj
+    const { role, permission } = roleObj
+
+    // Check if role is valid or not
+    await this.checkRole(role)
 
     // What permissions role have
     await this.checkPermissions(permission)
@@ -23,10 +26,16 @@ class AccessRules extends CRUD {
 
   // Check if all the permissions are valid or not
   async checkPermissions (permissions = []) {
-    permissions.forEach(async permission => {
+    for (const permission of permissions) {
       const { data } = await this.privileges.getPrivilegeById(permission.toString())
       if (!data) throw new InvalidParam('Invalid privileges provided')
-    })
+    }
+  }
+
+  // Check if role is valid or not
+  async checkRole (roleId = false) {
+    const { data } = await this.roles.getRoleById(roleId)
+    if (!data) throw new InvalidParam('Role is invalid')
   }
 }
 
