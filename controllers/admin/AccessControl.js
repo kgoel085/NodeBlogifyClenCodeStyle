@@ -28,9 +28,7 @@ module.exports = {
 
     return AccessControl
       .createRule(userInput)
-      .then(data => {
-        console.log(data)
-      })
+      .then(data => res.status(data.statusCode).send(data))
       .catch(err => nxt(err))
   }
 }
