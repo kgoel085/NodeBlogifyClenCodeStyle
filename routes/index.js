@@ -7,9 +7,13 @@ const { isLoggedIn } = require('./../middlewares')
 const UserRoutes = require('./user')
 router.use('/user', UserRoutes)
 
+// Category routes
+const CategoryRoutes = require('./category')
+router.use('/category', isLoggedIn, CategoryRoutes)
+
 // Admin routes
-const AdminRoutes = require('./admin')
-router.use('/admin', isLoggedIn, AdminRoutes)
+// const AdminRoutes = require('./admin')
+// router.use('/admin', isLoggedIn, AdminRoutes)
 
 router.get('/', (req, res, nxt) => {
   res.send('Welcome back....!')
