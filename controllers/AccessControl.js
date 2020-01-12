@@ -1,4 +1,4 @@
-const AccessControl = require('./../../modules/AccessRules')
+const AccessControl = require('../modules/AccessRules')
 
 module.exports = {
   // Create a privilege
