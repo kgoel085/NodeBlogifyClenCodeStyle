@@ -37,6 +37,15 @@ const helpers = {
     throw new InvalidParam(`${val} is not a valid email`)
   },
 
+  // Validate Mongo DB ObjectId
+  validateObjectId (str = '') {
+    str = str.toString() + ''
+    const len = str.length
+    let valid = false
+    if (len === 12 || len === 24) valid = /^[0-9a-fA-F]+$/.test(str)
+    return valid
+  },
+
   // Check if is array
   isArray: (varObj, chkLength = false) => {
     let returnVal = false
