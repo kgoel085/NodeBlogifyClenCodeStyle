@@ -25,6 +25,16 @@ class CRUD {
     return this.schema(obj)
   }
 
+  // Convert ID to Database ID
+  async makeDbId (id = null) {
+    if (id) {
+      const db = await this.db
+      const DbId = db.makeId(id)
+      return DbId
+    }
+    return id
+  }
+
   // Insert record
   async insert (obj) {
     try {
@@ -69,7 +79,7 @@ class CRUD {
   async findById (id = isRequired('id'), opts = {}) {
     try {
       const db = await this.db
-      const DbId = db.makeId(id)
+      const DbId = await this.makeDbId(id)
 
       // Check var type
       if (!DbId || (opts && !isObject(opts))) throw new InvalidParam('Invalid parameters provided')
