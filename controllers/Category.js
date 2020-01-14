@@ -9,5 +9,13 @@ module.exports = {
       .createCategory(body)
       .then(result => res.status(result.statusCode).json(result))
       .catch(err => nxt(err))
+  },
+
+  // Get all categories
+  getAllCategories: async (req, res, nxt) => {
+    return Category
+      .getCategories()
+      .then(result => res.status(result.statusCode).json(result))
+      .catch(err => nxt(err))
   }
 }
