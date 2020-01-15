@@ -1,6 +1,6 @@
 const CRUD = require('./../../services/CRUD')
 const { InvalidParam, UniqueConstraint } = require('./../../helpers/error')
-const { validateObjectId, isArray, isObject } = require('./../../helpers')
+const { validateObjectId, isArray, isRequired } = require('./../../helpers')
 
 class Category extends CRUD {
   constructor (db = null, schema = null) {
@@ -44,10 +44,10 @@ class Category extends CRUD {
   }
 
   // Get all categories
-  async getCategories (id = null) {
+  async getCategories (id = null, getChild = true) {
     try {
-      const categoryData = await this.fetchCategories(id)
-      const data = (isObject(categoryData, true)) ? categoryData : false
+      const categoryData = await this.fetchCategories(id, false, getChild)
+      const data = (isArray(categoryData, true)) ? categoryData : false
 
       const returnData = { data, statusCode: 200, success: true, msg: 'Categories found' }
       if (!data) returnData.msg = 'No categories found !'
@@ -58,28 +58,47 @@ class Category extends CRUD {
     }
   }
 
+  // Get category by id
+  async getCategoriesById ({ id = isRequired('id'), returnChild = false }) {
+    if (!id || !validateObjectId(id)) throw new InvalidParam('Invalid id provided !') // Category id to fetch
+
+    // Whether to return child for category [ 0 or 1 ]
+    let getChild = false
+    if (returnChild && parseInt(returnChild) === 1) getChild = true
+
+    // Category data
+    const data = await this.getCategories(id, getChild)
+    return data
+  }
+
   // Recursively fetch all the categories
-  async fetchCategories (id = null, isChild = false) {
-    let returnArr = {}
+  async fetchCategories (id = null, isChild = false, returnChild = true) {
+    const returnArr = []
 
     if (id) id = id.toString()
     let searchQry = { isChild: id, isActive: true }
 
-    // Get parent details, if not child
+    // Look for id first, if not child
     if (!isChild && id) {
       const parentId = await this.makeDbId(id)
       searchQry = { _id: parentId, isActive: true }
     }
 
+    // Fetch data, if present
     const { data: parentData } = await this.findAll(searchQry)
     if (parentData && isArray(parentData, true)) {
       for (const parent of parentData) {
         const { _id } = parent
-        returnArr = { ...parent }
+        let tmpObj = { ...parent }
 
-        // Fetch nested categories
-        const dataArr = await this.fetchCategories(_id, true)
-        if (dataArr && isObject(dataArr, true)) returnArr = { ...parent, nested: dataArr }
+        // Check if child is requested or not
+        if (returnChild) {
+          // Fetch child categories
+          const dataArr = await this.fetchCategories(_id, true)
+          if (dataArr && isArray(dataArr, true)) tmpObj = { ...parent, nested: [{ ...dataArr }] }
+        }
+
+        returnArr.push(tmpObj)
       }
     }
 
