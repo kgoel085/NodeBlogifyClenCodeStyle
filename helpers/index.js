@@ -93,6 +93,9 @@ const helpers = {
         return value
       case 'string':
         return helpers.validateString(lbl, value)
+      case 'boolean':
+        if (!value.constructor === Boolean) throw new TypeError(`${lbl} should be a boolean`)
+        return value
     }
   }
 }
