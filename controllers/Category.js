@@ -12,10 +12,19 @@ module.exports = {
   },
 
   // Get all categories
-  getAllCategories: async (req, res, nxt) => {
+  getAllCategories: (req, res, nxt) => {
     return Category
       .getCategories()
       .then(result => res.status(result.statusCode).json(result))
+      .catch(err => nxt(err))
+  },
+
+  // Get category by id
+  getCategoryById: (req, res, nxt) => {
+    const dataObj = { ...req.params, ...req.query }
+    return Category
+      .getCategoriesById(dataObj)
+      .then(data => res.status(data.statusCode).json(data))
       .catch(err => nxt(err))
   }
 }
