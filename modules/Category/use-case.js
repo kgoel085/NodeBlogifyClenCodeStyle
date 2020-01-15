@@ -95,7 +95,7 @@ class Category extends CRUD {
         if (returnChild) {
           // Fetch child categories
           const dataArr = await this.fetchCategories(_id, true)
-          if (dataArr && isArray(dataArr, true)) tmpObj = { ...parent, nested: [{ ...dataArr }] }
+          if (dataArr && isArray(dataArr, true)) tmpObj = { ...parent, nested: [...dataArr] }
         }
 
         returnArr.push(tmpObj)
