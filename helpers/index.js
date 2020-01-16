@@ -67,6 +67,11 @@ const helpers = {
   // Check if is float
   isFloat: n => Number(n) === n && n % 1 !== 0,
 
+  // Check if is a valid date
+  isDate: date => {
+    return parseInt(date) && (new Date(date) !== 'Invalid Date') && !isNaN(new Date(date))
+  },
+
   // Check if object has a property available
   hasOwnProperty: (obj, key) => {
     return Object.prototype.hasOwnProperty.call(obj, key)
@@ -75,28 +80,36 @@ const helpers = {
   // Check the type of the value
   isType: (type = false, value = false, lbl = false, checkVal = false) => {
     if (checkVal && !value) throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
-
     switch (type.toLowerCase()) {
       case 'array':
         if (!helpers.isArray(value, checkVal)) throw new TypeError(`${lbl} should be an array`)
-        return value
+        break
       case 'object':
         if (!helpers.isObject(value, checkVal)) throw new TypeError(`${lbl} should be an object`)
-        return value
+        break
       case 'number':
       case 'integer':
         if (!value.constructor === Number) throw new TypeError(`${lbl} should be a number`)
-        return value
+        break
       case 'float':
       case 'decimal':
         if (!helpers.isFloat(value)) throw new TypeError(`${lbl} should be a float/decimal value`)
-        return value
+        break
       case 'string':
-        return helpers.validateString(lbl, value)
+        value = helpers.validateString(lbl, value)
+        break
       case 'boolean':
         if (!value.constructor === Boolean) throw new TypeError(`${lbl} should be a boolean`)
-        return value
+        break
+      case 'databaseid':
+        if (!helpers.validateObjectId(value)) throw new TypeError(`${lbl} should be a valid id`)
+        break
+      case 'date':
+        if (!helpers.isDate(value)) throw new TypeError(`${lbl} should be a valid date`)
+        break
     }
+
+    return value
   }
 }
 
