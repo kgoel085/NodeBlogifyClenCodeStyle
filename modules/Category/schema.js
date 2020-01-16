@@ -10,9 +10,13 @@ const validateObj = ({
   ...otherInfo
 } = {}) => {
   category = validateString('role', category)
-  createdBy = validateString('createdBy', createdBy)
-  if (isChild) isChild = isType('string', isChild, 'isChild', true)
-  return {
+  createdBy = isType('databaseId', createdBy, 'createdBy', true)
+  isActive = isType('boolean', isActive, 'isActive')
+  createdAt = isType('date', createdAt, 'createdAt', true)
+  if (modifiedAt) modifiedAt = isType('date', modifiedAt, 'modifiedAt', true)
+  if (isChild) isChild = isType('databaseId', isChild, 'isChild', true)
+
+  const returnObj = {
     category,
     createdBy,
     isActive,
@@ -21,6 +25,7 @@ const validateObj = ({
     isChild,
     ...otherInfo
   }
+  return returnObj
 }
 
 const normalizeObj = ({
