@@ -1,32 +1,5 @@
-const { isRequired, validateString, isType, normalizeString } = require('../../helpers')
-
-const validateObj = ({
-  category = isRequired('category'),
-  createdBy = isRequired('createdBy'),
-  isActive = true,
-  createdAt = new Date().getTime(),
-  modifiedAt = null,
-  isChild = null,
-  ...otherInfo
-} = {}) => {
-  category = validateString('role', category)
-  createdBy = isType('databaseId', createdBy, 'createdBy', true)
-  isActive = isType('boolean', isActive, 'isActive')
-  createdAt = isType('date', createdAt, 'createdAt', true)
-  if (modifiedAt) modifiedAt = isType('date', modifiedAt, 'modifiedAt', true)
-  if (isChild) isChild = isType('databaseId', isChild, 'isChild', true)
-
-  const returnObj = {
-    category,
-    createdBy,
-    isActive,
-    createdAt,
-    modifiedAt,
-    isChild,
-    ...otherInfo
-  }
-  return returnObj
-}
+const { normalizeString } = require('../../helpers')
+const validateSchema = require('./../../helpers/schema')
 
 const normalizeObj = ({
   category,
@@ -39,9 +12,37 @@ const normalizeObj = ({
   }
 }
 
+const schema = {
+  category: {
+    required: true,
+    type: 'string'
+  },
+  createdBy: {
+    required: true,
+    type: 'databaseId'
+  },
+  isActive: {
+    type: 'boolean',
+    default: true
+  },
+  createdAt: {
+    type: 'date',
+    default: new Date().getTime()
+  },
+  modifiedAt: {
+    type: 'date',
+    default: null
+  },
+  isChild: {
+    default: null,
+    type: 'databaseId'
+  },
+  nested: null
+}
+
 module.exports = categoryObj => {
-  const validObj = validateObj(categoryObj)
-  const normalObj = normalizeObj(validObj)
+  categoryObj = validateSchema(schema, categoryObj)
+  const normalObj = normalizeObj(categoryObj)
 
   return normalObj
 }
