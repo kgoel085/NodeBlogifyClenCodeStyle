@@ -28,16 +28,24 @@ const validateSchema = (schema, obj) => {
   const validObject = {}
 
   for (const key of Object.keys(schema)) {
-    if (!isObject(schema[key])) continue
-    const { required, type, default: defaultVal } = schema[key]
-    let currentVal = obj[key]
+    let currentVal = obj[key] // Current request object value
 
-    // Check if correct type is received or not
-    if (type) {
-      if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
-      else if (!currentVal && (defaultVal || defaultVal === null)) currentVal = defaultVal // Check if no value is present set default one
+    // Add the columns that are allowed but not have any validation
+    if (!isObject(schema[key]) || schema[key] === undefined) {
+      if (currentVal && currentVal !== undefined) validObject[key] = currentVal
+      continue
     }
 
+    // Check if correct type is received or not
+    const { required, type, default: defaultVal } = schema[key]
+    if (type) {
+      if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
+      else if (!currentVal) { // If value is not present
+        if ((defaultVal && defaultVal !== undefined) || defaultVal === null || defaultVal === false || defaultVal === 0) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
+        else continue
+      }
+    }
+    // console.log(key, typeof currentVal, defaultVal, required, type)
     validObject[key] = currentVal
   }
 
