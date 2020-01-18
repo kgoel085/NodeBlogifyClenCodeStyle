@@ -31,10 +31,11 @@ const helpers = {
 
   // Validate Email
   validateEmail: (lbl, val = '') => {
-    const filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
-    if (filter.test(val)) return val
+    // const filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
+    const filter = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    if (filter.test(String(val).toLowerCase())) return val
 
-    throw new InvalidParam(`${val} is not a valid email`)
+    throw new InvalidParam(`${lbl} is not a valid email`)
   },
 
   // Validate Mongo DB ObjectId
@@ -81,6 +82,9 @@ const helpers = {
   isType: (type = false, value = false, lbl = false, checkVal = false) => {
     if (checkVal && !value) throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
     switch (type.toLowerCase()) {
+      case 'email':
+        value = helpers.validateEmail(lbl, value)
+        break
       case 'array':
         if (!helpers.isArray(value, checkVal)) throw new TypeError(`${lbl} should be an array`)
         break
@@ -106,6 +110,7 @@ const helpers = {
         break
       case 'date':
         if (!helpers.isDate(value)) throw new TypeError(`${lbl} should be a valid date`)
+        value = value.toString()
         break
     }
 
