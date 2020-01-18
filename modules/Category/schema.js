@@ -1,5 +1,6 @@
 const { normalizeString } = require('../../helpers')
-const validateSchema = require('./../../helpers/schema')
+// const validateSchema = require('./../../helpers/schema')
+const SchemaClass = require('./../../services/Schema')
 
 const normalizeObj = ({
   category,
@@ -12,7 +13,7 @@ const normalizeObj = ({
   }
 }
 
-const schema = {
+const fields = {
   category: {
     required: true,
     type: 'string'
@@ -40,8 +41,10 @@ const schema = {
   nested: null
 }
 
+const Schema = new SchemaClass(fields)
 module.exports = categoryObj => {
-  categoryObj = validateSchema(schema, categoryObj)
+  // categoryObj = validateSchema(schema, categoryObj)
+  categoryObj = Schema.init(categoryObj)
   const normalObj = normalizeObj(categoryObj)
 
   return normalObj
