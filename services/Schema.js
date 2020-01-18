@@ -70,9 +70,11 @@ class Schema {
 
   // Differentiate keys based on their relevance
   createKeys () {
-    const paramsKeys = Object.keys(this.filtered)
+    const paramsKeys = Object.keys(this.schema)
     for (const key of paramsKeys) {
-      const { required, guarded, hidden } = this.filtered[key]
+      if (!isObject(this.schema[key])) continue
+
+      const { required, guarded, hidden } = this.schema[key]
       if (required) { // After adding required field, then continue
         this.required.push(key)
         continue
