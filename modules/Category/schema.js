@@ -1,5 +1,4 @@
 const { normalizeString } = require('../../helpers')
-// const validateSchema = require('./../../helpers/schema')
 const SchemaClass = require('./../../services/Schema')
 
 const normalizeObj = ({
@@ -41,10 +40,9 @@ const fields = {
   nested: null
 }
 
-const Schema = new SchemaClass(fields)
 module.exports = categoryObj => {
-  // categoryObj = validateSchema(schema, categoryObj)
-  categoryObj = Schema.init(categoryObj)
+  const Schema = new SchemaClass(fields)
+  categoryObj = Schema.validate(categoryObj)
   const normalObj = normalizeObj(categoryObj)
 
   return normalObj

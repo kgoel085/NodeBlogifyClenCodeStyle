@@ -1,6 +1,5 @@
-const validateSchema = require('./../../helpers/schema')
-
-const schema = {
+const SchemaClass = require('./../../services/Schema')
+const fields = {
   username: {
     required: true,
     type: 'string'
@@ -27,7 +26,8 @@ const schema = {
 }
 
 module.exports = (userObj) => {
+  const Schema = new SchemaClass(fields)
   // Validate Object
-  const validObj = validateSchema(schema, userObj)
+  const validObj = Schema.validate(userObj)
   return validObj
 }
