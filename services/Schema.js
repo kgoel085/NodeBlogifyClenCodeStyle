@@ -2,7 +2,8 @@ const { isRequired, isType, hasOwnProperty, isObject } = require('./../helpers')
 const { RequiredParam } = require('./../helpers/error')
 class Schema {
   constructor (schema = isRequired('schema')) {
-    this.schema = schema // Stores the provided schema
+    isType('object', schema, 'Schema', true)
+    this.schema = { ...schema, _id: { type: 'databaseId' } } // Stores the provided schema
 
     this.original = {} // Original attributes received object
     this.filtered = {} // Filtered attributes object
@@ -15,8 +16,8 @@ class Schema {
     this.unwanted = [] // Attributes that are either not allowed / unwanted
   }
 
-  // Init the class properties
-  init (params = isRequired('params')) {
+  // Init the class properties & validate schema
+  validate (params = isRequired('params')) {
     isType('object', params, 'Params', true) // Check the param type and length
     this.original = params
 
@@ -29,7 +30,7 @@ class Schema {
   validateSchema () {
     const validObject = {}
 
-    for (const key of Object.keys(this.filtered)) {
+    for (const key of Object.keys(this.schema)) {
       let currentVal = this.filtered[key] // Current request object value
 
       // Add the columns that are allowed but not have any validation
@@ -43,7 +44,7 @@ class Schema {
       if (type) {
         if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
         else if (!currentVal) { // If value is not present
-          if ((defaultVal && defaultVal !== undefined) || defaultVal === null || defaultVal === false || defaultVal === 0) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
+          if (this.checkForValidDefaultVal(defaultVal)) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
           else continue
         }
       }
@@ -91,6 +92,11 @@ class Schema {
         if (!hasOwnProperty(this.filtered, key)) throw new RequiredParam(key)
       }
     }
+  }
+
+  // Check whether default value is valid to be assigned or not
+  checkForValidDefaultVal (defaultVal = undefined) {
+    return (defaultVal && defaultVal !== undefined) || defaultVal === null || defaultVal === false || defaultVal === 0
   }
 }
 
