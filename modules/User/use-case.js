@@ -30,9 +30,7 @@ class User extends CRUD {
 
     // If operation was success
     if (success && data.length === 1) {
-      const { password, tokens, ...filterDt } = data[0]
-
-      returnData.data = filterDt
+      returnData.data = data[0]
       returnData.message = 'Signup was successful'
 
       return returnData
