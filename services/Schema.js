@@ -1,9 +1,10 @@
 const { isRequired, isType, hasOwnProperty, isObject } = require('./../helpers')
 const { RequiredParam } = require('./../helpers/error')
 class Schema {
-  constructor (schema = isRequired('schema')) {
+  constructor (schema = isRequired('schema'), isResponse = false) {
     isType('object', schema, 'Schema', true)
     this.schema = { ...schema, _id: { type: 'databaseId' } } // Stores the provided schema
+    this.isResponse = isResponse
 
     this.original = {} // Original attributes received object
     this.filtered = {} // Filtered attributes object
@@ -21,14 +22,15 @@ class Schema {
     isType('object', params, 'Params', true) // Check the param type and length
     this.original = params
 
+    this.createKeys() // Sort out keys based on their relevance
     this.filterParams() // Filter the param object
-    this.checkForRequiredFields() // Perform required / guarded / hidden ccs
+    this.checkForRequiredFields() // Perform required / guarded / hidden
     return this.validateSchema() // Validate the params against the schema
   }
 
   // Validate the params with stored schema
   validateSchema () {
-    const validObject = {}
+    const validObject = this.attributes
 
     for (const key of Object.keys(this.schema)) {
       let currentVal = this.filtered[key] // Current request object value
@@ -47,10 +49,14 @@ class Schema {
           if (this.checkForValidDefaultVal(defaultVal)) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
           else continue
         }
+
+        // Filter out the hidden attributes from response
+        if (this.isResponse && this.hidden.length > 0 && this.hidden.includes(key)) continue
+        validObject[key] = currentVal
       }
-      validObject[key] = currentVal
     }
 
+    // Returns the final filtered response / schema structure
     return validObject
   }
 
@@ -62,11 +68,9 @@ class Schema {
     const paramKeys = Object.keys(this.original)
 
     for (const key of paramKeys) {
-      if (schemaKeys.includes(key)) this.filtered[key] = this.original[key]
+      if (schemaKeys.includes(key) && !this.guarded.includes(key)) this.filtered[key] = this.original[key]
       else this.unwanted.push(key)
     }
-
-    this.createKeys() // Sort out keys based on their relevance
   }
 
   // Differentiate keys based on their relevance
