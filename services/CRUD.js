@@ -15,14 +15,14 @@ class CRUD {
   }
 
   // Map document details to schema
-  mapSchema (obj, isResponse = false) {
+  mapSchema (obj) {
     // If no result is there
     if (!isArray(obj) && !isObject(obj)) return null
 
     // If object is array
-    if (isArray(obj)) return obj.map(item => this.schema(item, isResponse))
+    if (isArray(obj)) return obj.map(item => this.schema(item))
 
-    return this.schema(obj, isResponse)
+    return this.schema(obj)
   }
 
   // Convert ID to Database ID
@@ -52,7 +52,7 @@ class CRUD {
       let errorPresent = true
       if (result.ok === 1) errorPresent = false
 
-      return this._returnResponse(200, errorPresent, { data: this.mapSchema(ops, true), insertedCount })
+      return this._returnResponse(200, errorPresent, { data: this.mapSchema(ops), insertedCount })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
@@ -69,7 +69,7 @@ class CRUD {
       const result = await db.collection(this.collection).findOne(query, opts)
       // if (!result || result === false) throw new Error('No data found')
 
-      return this._returnResponse(200, false, { data: this.mapSchema(result, true) })
+      return this._returnResponse(200, false, { data: this.mapSchema(result) })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
@@ -87,7 +87,7 @@ class CRUD {
       const result = await db.collection(this.collection).findOne({ _id: DbId }, opts)
       // if (!result || result === false) throw new Error('No data found')
 
-      return this._returnResponse(200, false, { data: this.mapSchema(result, true) })
+      return this._returnResponse(200, false, { data: this.mapSchema(result) })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
@@ -104,7 +104,7 @@ class CRUD {
       const result = await db.collection(this.collection).find(query, opts).toArray()
       // if (!result || result === false) throw new Error('No data found')
 
-      return this._returnResponse(200, false, { data: (isArray(result)) ? this.mapSchema(result, true) : null })
+      return this._returnResponse(200, false, { data: (isArray(result)) ? this.mapSchema(result) : null })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
@@ -134,7 +134,7 @@ class CRUD {
       const { success, data: newUserData } = await this.findOne(filter)
       if (!success) throw new Error('Unable to fetch updated data')
 
-      return this._returnResponse(200, errorPresent, { data: this.mapSchema(newUserData, true) })
+      return this._returnResponse(200, errorPresent, { data: this.mapSchema(newUserData) })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
@@ -164,7 +164,7 @@ class CRUD {
       const { success, data: newUserData } = await this.findAll(filter)
       if (!success) throw new Error('Unable to fetch updated data')
 
-      return this._returnResponse(200, errorPresent, { data: this.mapSchema(newUserData, true) })
+      return this._returnResponse(200, errorPresent, { data: this.mapSchema(newUserData) })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
@@ -184,7 +184,7 @@ class CRUD {
       let errorPresent = true
       if (ok === 1) errorPresent = false
 
-      return this._returnResponse(200, errorPresent, { data: this.mapSchema(value, true) })
+      return this._returnResponse(200, errorPresent, { data: this.mapSchema(value) })
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
