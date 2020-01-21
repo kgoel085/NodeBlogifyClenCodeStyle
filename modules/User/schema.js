@@ -10,23 +10,35 @@ const fields = {
   },
   createdAt: {
     type: 'date',
-    default: new Date().getTime()
+    default: new Date().getTime(),
+    guarded: true
   },
   modifiedAt: {
     type: 'date',
-    default: null
+    default: null,
+    guarded: true
   },
   isActive: {
     type: 'boolean',
     default: true
   },
-  password: undefined,
-  confirmPassword: undefined,
-  tokens: undefined
+  password: {
+    type: 'string',
+    required: true,
+    hidden: true
+  },
+  confirmPassword: {
+    type: false
+  },
+  tokens: {
+    type: 'array',
+    hidden: true,
+    guarded: true
+  }
 }
 
-module.exports = (userObj) => {
-  const Schema = new SchemaClass(fields)
+module.exports = (userObj, isResponse = false) => {
+  const Schema = new SchemaClass(fields, isResponse)
   // Validate Object
   const validObj = Schema.validate(userObj)
   return validObj

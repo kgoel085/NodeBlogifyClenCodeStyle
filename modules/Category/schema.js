@@ -27,21 +27,27 @@ const fields = {
   },
   createdAt: {
     type: 'date',
-    default: new Date().getTime()
+    default: new Date().getTime(),
+    guarded: true
   },
   modifiedAt: {
     type: 'date',
-    default: null
+    default: null,
+    guarded: true
   },
   isChild: {
     default: null,
     type: 'databaseId'
   },
-  nested: null
+  nested: {
+    type: false,
+    guarded: true
+  }
 }
 
-module.exports = categoryObj => {
-  const Schema = new SchemaClass(fields)
+module.exports = (categoryObj, isResponse = false) => {
+  const Schema = new SchemaClass(fields, isResponse)
+
   categoryObj = Schema.validate(categoryObj)
   const normalObj = normalizeObj(categoryObj)
 
