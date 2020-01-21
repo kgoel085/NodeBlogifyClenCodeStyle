@@ -45,9 +45,10 @@ const fields = {
   }
 }
 
-module.exports = (categoryObj, isResponse = false) => {
-  const Schema = new SchemaClass(fields, isResponse)
+const Schema = new SchemaClass(fields)
+Schema.normalizeObject = normalizeObj
 
+module.exports = (categoryObj) => {
   categoryObj = Schema.validate(categoryObj)
   const normalObj = normalizeObj(categoryObj)
 

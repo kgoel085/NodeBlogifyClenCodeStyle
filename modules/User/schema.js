@@ -37,9 +37,7 @@ const fields = {
   }
 }
 
-module.exports = (userObj, isResponse = false) => {
-  const Schema = new SchemaClass(fields, isResponse)
-  // Validate Object
-  const validObj = Schema.validate(userObj)
-  return validObj
+module.exports = (userObj) => {
+  const Schema = new SchemaClass(fields)
+  return Schema.validate(userObj)
 }
