@@ -1,7 +1,7 @@
 const { isRequired, isType, hasOwnProperty, isObject } = require('./../helpers')
 const { RequiredParam } = require('./../helpers/error')
 class Schema {
-  constructor (schema = isRequired('schema'), isResponse = false) {
+  constructor (schema = isRequired('schema'), isResponse = true) {
     isType('object', schema, 'Schema', true)
     this.schema = { ...schema, _id: { type: 'databaseId' } } // Stores the provided schema
     this.isResponse = isResponse
@@ -56,6 +56,9 @@ class Schema {
       }
     }
 
+    // Use this function to perform any modifications to final return object
+    this.normalizeObject(this.attributes)
+
     // Returns the final filtered response / schema structure
     return validObject
   }
@@ -102,6 +105,9 @@ class Schema {
   checkForValidDefaultVal (defaultVal = undefined) {
     return (defaultVal && defaultVal !== undefined) || defaultVal === null || defaultVal === false || defaultVal === 0
   }
+
+  // Normalize final response before sending
+  normalizeObject (attributes) {}
 }
 
 module.exports = Schema
