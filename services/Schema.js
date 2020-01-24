@@ -5,6 +5,7 @@ class Schema {
     isType('object', schema, 'Schema', true)
     this.schema = { ...schema, _id: { type: 'databaseId' } } // Stores the provided schema
     this.isResponse = isResponse
+    this.normalizeObject = null // use this to apply any filter to the validated schema object
 
     this.original = {} // Original attributes received object
     this.filtered = {} // Filtered attributes object
@@ -42,7 +43,7 @@ class Schema {
       }
 
       // Check if correct type is received or not
-      const { required, type, default: defaultVal } = this.schema[key]
+      const { required, type, default: defaultVal, valueType } = this.schema[key]
       if (type) {
         if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
         else if (!currentVal) { // If value is not present
@@ -50,14 +51,18 @@ class Schema {
           else continue
         }
 
+        // Validate values of the current value if applicable
+        if (valueType && currentVal) this.validateValueType(valueType, key, currentVal)
+
         // Filter out the hidden attributes from response
         if (this.isResponse && this.hidden.length > 0 && this.hidden.includes(key)) continue
+
         validObject[key] = currentVal
       }
     }
 
     // Use this function to perform any modifications to final return object
-    this.normalizeObject(this.attributes)
+    if (this.normalizeObject && typeof this.normalizeObject === 'function') return this.normalizeObject(validObject)
 
     // Returns the final filtered response / schema structure
     return validObject
@@ -106,8 +111,14 @@ class Schema {
     return (defaultVal && defaultVal !== undefined) || defaultVal === null || defaultVal === false || defaultVal === 0
   }
 
-  // Normalize final response before sending
-  normalizeObject (attributes) {}
+  // Validate if value type is correct or not, for array or objects
+  validateValueType (type = null, lbl = null, val = null) {
+    if (isType('array', val, lbl, true)) this.validateArrayValues(type, lbl, val) // Validate array values
+  }
+
+  validateArrayValues (type = null, lbl = null, val = null) {
+    for (const key of val) isType(type, key, lbl)
+  }
 }
 
 module.exports = Schema
