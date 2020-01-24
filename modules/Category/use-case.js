@@ -104,6 +104,15 @@ class Category extends CRUD {
 
     return returnArr
   }
+
+  // Update category
+  async updateCategory (obj = {}) {
+    const { _id: categoryId, isChild, ...details } = this.schema(obj)
+    if (!this.checkCategory(categoryId, true)) throw InvalidParam('Provided category is invalid !')
+
+    // Check if child is valid or not
+    if (isChild && !validateObjectId(isChild)) throw InvalidParam('Provided child category is invalid !')
+  }
 }
 
 module.exports = Category

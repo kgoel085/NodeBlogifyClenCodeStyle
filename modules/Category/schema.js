@@ -48,9 +48,4 @@ const fields = {
 const Schema = new SchemaClass(fields)
 Schema.normalizeObject = normalizeObj
 
-module.exports = (categoryObj) => {
-  categoryObj = Schema.validate(categoryObj)
-  const normalObj = normalizeObj(categoryObj)
-
-  return normalObj
-}
+module.exports = (categoryObj) => Schema.validate(categoryObj)
