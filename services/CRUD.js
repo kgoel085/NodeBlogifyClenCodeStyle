@@ -20,9 +20,9 @@ class CRUD {
     if (!isArray(obj) && !isObject(obj)) return null
 
     // If object is array
-    if (isArray(obj)) return obj.map(item => this.schema(item))
+    if (isArray(obj)) return obj.map(item => this.schema(item, true))
 
-    return this.schema(obj)
+    return this.schema(obj, true)
   }
 
   // Convert ID to Database ID

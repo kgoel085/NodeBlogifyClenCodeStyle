@@ -19,9 +19,12 @@ class Schema {
   }
 
   // Init the class properties & validate schema
-  validate (params = isRequired('params')) {
+  validate (params = isRequired('params'), isResponse = false) {
     isType('object', params, 'Params', true) // Check the param type and length
+    isType('boolean', isResponse, 'isResponse', true) // Check the param type and length
+
     this.original = params
+    this.isResponse = isResponse
 
     this.createKeys() // Sort out keys based on their relevance
     this.filterParams() // Filter the param object
@@ -47,15 +50,17 @@ class Schema {
       if (type) {
         if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
         else if (!currentVal) { // If value is not present
-          if (this.checkForValidDefaultVal(defaultVal)) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
+          if (this.checkForValidDefaultVal(defaultVal, key)) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
           else continue
         }
 
         // Validate values of the current value if applicable
         if (valueType && currentVal) this.validateValueType(valueType, key, currentVal)
 
-        // Filter out the hidden attributes from response
-        if (this.isResponse && this.hidden.length > 0 && this.hidden.includes(key)) continue
+        // Filter out the hidden / guarded attributes from response
+        if (this.isResponse) {
+          if (this.hidden.length > 0 && this.hidden.includes(key)) continue
+        } else if (this.guarded.includes(key)) continue
 
         validObject[key] = currentVal
       }
@@ -89,11 +94,11 @@ class Schema {
 
       const { required, guarded, hidden } = this.schema[key]
       if (required) { // After adding required field, then continue
-        this.required.push(key)
+        if (!this.required.includes(key)) this.required.push(key)
         continue
       }
-      if (guarded) this.guarded.push(key)
-      if (hidden) this.hidden.push(key)
+      if (guarded && !this.guarded.includes(key)) this.guarded.push(key)
+      if (hidden && !this.hidden.includes(key)) this.hidden.push(key)
     }
   }
 
