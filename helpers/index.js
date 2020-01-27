@@ -80,7 +80,7 @@ const helpers = {
 
   // Check the type of the value
   isType: (type = false, value = false, lbl = false, checkVal = false) => {
-    if (checkVal && !value) throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
+    if (checkVal && !value && type.toLowerCase() !== 'boolean') throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
     switch (type.toLowerCase()) {
       case 'email':
         value = helpers.validateEmail(lbl, value)
