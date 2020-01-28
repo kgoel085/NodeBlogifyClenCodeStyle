@@ -32,12 +32,9 @@ module.exports = {
   updateCategories: async (req, res, nxt) => {
     const { id: categoryId } = req.params
     const updateData = { ...req.body, _id: categoryId }
-    try {
-      const result = await Category.updateCategory(updateData)
-      console.log(result)
-    } catch (err) {
-      console.log(err)
-      nxt(err)
-    }
+    return Category
+      .updateCategory(updateData)
+      .then(data => res.status(data.statusCode).json(data))
+      .catch(err => nxt(err))
   }
 }

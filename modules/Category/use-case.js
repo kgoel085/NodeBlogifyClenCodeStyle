@@ -111,7 +111,14 @@ class Category extends CRUD {
     if (!this.checkCategory(categoryId, true)) throw InvalidParam('Provided category is invalid !')
 
     // Check if child is valid or not
-    if (isChild && !validateObjectId(isChild)) throw InvalidParam('Provided child category is invalid !')
+    if (isChild) {
+      if (!validateObjectId(isChild) || !this.checkCategory(isChild, true)) throw InvalidParam('Provided child category is invalid !')
+    }
+
+    // Update data
+    const updateId = await this.makeDbId(categoryId)
+    const result = await this.updateOne({ _id: updateId }, { $set: { ...details, isChild } })
+    return result
   }
 }
 
