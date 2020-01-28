@@ -35,8 +35,12 @@ class Schema {
   // Validate the params with stored schema
   validateSchema () {
     const validObject = this.attributes
-
     for (const key of Object.keys(this.schema)) {
+      // Filter out the hidden / guarded attributes from response
+      if (this.isResponse) {
+        if (this.hidden.length > 0 && this.hidden.includes(key)) continue
+      } else if (this.guarded.includes(key)) continue
+
       let currentVal = this.filtered[key] // Current request object value
 
       // Add the columns that are allowed but not have any validation
@@ -57,20 +61,19 @@ class Schema {
         // Validate values of the current value if applicable
         if (valueType && currentVal) this.validateValueType(valueType, key, currentVal)
 
-        // Filter out the hidden / guarded attributes from response
-        if (this.isResponse) {
-          if (this.hidden.length > 0 && this.hidden.includes(key)) continue
-        } else if (this.guarded.includes(key)) continue
-
         validObject[key] = currentVal
       }
     }
 
+    // Reset everything
+    const returnObj = { ...validObject }
+    this.reset()
+
     // Use this function to perform any modifications to final return object
-    if (this.normalizeObject && typeof this.normalizeObject === 'function') return this.normalizeObject(validObject)
+    if (this.normalizeObject && typeof this.normalizeObject === 'function') return this.normalizeObject(returnObj)
 
     // Returns the final filtered response / schema structure
-    return validObject
+    return returnObj
   }
 
   // Filter out unwanted params
@@ -81,7 +84,7 @@ class Schema {
     const paramKeys = Object.keys(this.original)
 
     for (const key of paramKeys) {
-      if (schemaKeys.includes(key) && !this.guarded.includes(key)) this.filtered[key] = this.original[key]
+      if (schemaKeys.includes(key)) this.filtered[key] = this.original[key]
       else this.unwanted.push(key)
     }
   }
@@ -121,8 +124,24 @@ class Schema {
     if (isType('array', val, lbl, true)) this.validateArrayValues(type, lbl, val) // Validate array values
   }
 
+  // Validate if array has the defined value type
   validateArrayValues (type = null, lbl = null, val = null) {
     for (const key of val) isType(type, key, lbl)
+  }
+
+  // Reset everything
+  reset () {
+    // Reset attribute objects
+    this.original = {}
+    this.filtered = {}
+    this.attributes = {}
+
+    // Reset attribute keys
+    this.keys = []
+    this.required = []
+    this.guarded = []
+    this.hidden = []
+    this.unwanted = []
   }
 }
 
