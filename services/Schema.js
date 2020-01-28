@@ -96,12 +96,12 @@ class Schema {
       if (!isObject(this.schema[key])) continue
 
       const { required, guarded, hidden } = this.schema[key]
+      if (guarded && !this.guarded.includes(key)) this.guarded.push(key)
+      if (hidden && !this.hidden.includes(key)) this.hidden.push(key)
       if (required) { // After adding required field, then continue
         if (!this.required.includes(key)) this.required.push(key)
         continue
       }
-      if (guarded && !this.guarded.includes(key)) this.guarded.push(key)
-      if (hidden && !this.hidden.includes(key)) this.hidden.push(key)
     }
   }
 
