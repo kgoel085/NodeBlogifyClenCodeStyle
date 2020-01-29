@@ -104,6 +104,7 @@ const helpers = {
         break
       case 'boolean':
         if (!value.constructor === Boolean) throw new TypeError(`${lbl} should be a boolean`)
+        if (value !== true && value !== false) throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
         break
       case 'databaseid':
         if (!helpers.validateObjectId(value)) throw new TypeError(`${lbl} should be a valid id`)
