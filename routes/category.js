@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const { createCategory, getAllCategories, getCategoryById, updateCategory, deleteCategory } = require('./../controllers/Category')
+const { createCategory, getAllCategories, getCategoryById, updateCategory, modifyCategoryStatus } = require('./../controllers/Category')
 
 // Mark category as inActive
-router.delete('/:id', deleteCategory)
+router.put('/:id/status', modifyCategoryStatus)
 
 // Update single category
 router.post('/:id', updateCategory)
