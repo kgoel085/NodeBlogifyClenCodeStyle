@@ -44,9 +44,9 @@ class Category extends CRUD {
   }
 
   // Get all categories
-  async getCategories (id = null, getChild = true) {
+  async getCategories (id = null, getChild = true, cb = null) {
     try {
-      const categoryData = await this.fetchCategories(id, false, getChild)
+      const categoryData = await this.fetchCategories(id, false, getChild, cb)
       const data = (isArray(categoryData, true)) ? categoryData : false
 
       const returnData = { data, statusCode: 200, success: true, msg: 'Categories found' }
@@ -59,7 +59,7 @@ class Category extends CRUD {
   }
 
   // Get category by id
-  async getCategoriesById ({ id = isRequired('id'), returnChild = false }) {
+  async getCategoriesById ({ id = isRequired('id'), returnChild = false, cb = null }) {
     if (!id || !validateObjectId(id)) throw new InvalidParam('Invalid id provided !') // Category id to fetch
 
     // Whether to return child for category [ 0 or 1 ]
@@ -67,12 +67,12 @@ class Category extends CRUD {
     if (returnChild && parseInt(returnChild) === 1) getChild = true
 
     // Category data
-    const data = await this.getCategories(id, getChild)
+    const data = await this.getCategories(id, getChild, cb)
     return data
   }
 
   // Recursively fetch all the categories
-  async fetchCategories (id = null, isChild = false, returnChild = true) {
+  async fetchCategories (id = null, isChild = false, returnChild = true, cb = null) {
     const returnArr = []
 
     if (id) id = id.toString()
@@ -91,11 +91,14 @@ class Category extends CRUD {
         const { _id } = parent
         let tmpObj = { ...parent }
 
+        // Perform any operations on the fetched data. NOTE: Please always return the object passed as parameters
+        if (cb && typeof cb === 'function') tmpObj = await cb(parent)
+
         // Check if child is requested or not
         if (returnChild) {
           // Fetch child categories
-          const dataArr = await this.fetchCategories(_id, true)
-          if (dataArr && isArray(dataArr, true)) tmpObj = { ...parent, nested: [...dataArr] }
+          const dataArr = await this.fetchCategories(_id, true, true, cb)
+          if (dataArr && isArray(dataArr, true)) tmpObj = { ...tmpObj, nested: [...dataArr] }
         }
 
         returnArr.push(tmpObj)
@@ -121,25 +124,34 @@ class Category extends CRUD {
     return result
   }
 
-  // Mark a category as inactive
-  async deleteCategory (usrData = {}) {
-    const { id, disableChild } = usrData
+  // Mark a category as inactive / active
+  async modifyCategoryStatus (usrData = {}) {
+    const { id, isActive } = usrData
 
     // Validate values
+    if (!isActive) throw new InvalidParam('isActive is invalid !')
     isType('databaseId', id, 'id', true)
-
-    // Check whether to also disable child categories or not
-    let markChild = false
-    if (typeof disableChild !== 'undefined') {
-      isType('boolean', disableChild, 'disableChild', true)
-      markChild = true
-    }
+    isType('boolean', isActive, 'isActive', true)
 
     // Check if category exists or not
     const { data } = await this.checkCategory(id, true)
     if (!data) throw new InvalidParam('Invalid category provided !')
 
-    console.log(id, markChild)
+    // Callback to be executed for every received category
+    const callBack = async obj => {
+      const { _id } = obj
+      const catId = await this.makeDbId(_id)
+
+      // Return the updated data
+      const { success, data } = await this.updateOne({ _id: catId }, { $set: { isActive } })
+      if (success && data) obj = data
+
+      return obj
+    }
+    const { success, statusCode } = await this.getCategories(id, true, callBack)
+    if (success && statusCode === 200) return { success, statusCode, msg: 'Category updated' }
+
+    throw new Error('Problem processing request !')
   }
 }
 
