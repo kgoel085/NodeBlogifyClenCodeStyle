@@ -28,8 +28,8 @@ module.exports = {
       .catch(err => nxt(err))
   },
 
-  // Update categories
-  updateCategories: async (req, res, nxt) => {
+  // Update a single category
+  updateCategory: (req, res, nxt) => {
     const { id: categoryId } = req.params
     const updateData = { ...req.body, _id: categoryId }
     return Category
