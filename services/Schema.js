@@ -53,13 +53,13 @@ class Schema {
       const { required, type, default: defaultVal, valueType } = this.schema[key]
       if (type) {
         if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
-        else if (!currentVal) { // If value is not present
+        else if (!this.checkForValidDefaultVal(currentVal, key)) { // If value is not present
           if (this.checkForValidDefaultVal(defaultVal, key)) currentVal = defaultVal // Check for default value, possible: null, false, !undefined
           else continue
         }
 
         // Validate values of the current value if applicable
-        if (valueType && currentVal) this.validateValueType(valueType, key, currentVal)
+        if (valueType) this.validateValueType(valueType, key, currentVal)
 
         validObject[key] = currentVal
       }
