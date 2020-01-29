@@ -141,7 +141,7 @@ class CRUD {
   }
 
   // Update all the filter matching records
-  async updateAll (filter, updateQuery, opts) {
+  async updateAll (filter, updateQuery, opts = {}) {
     try {
       const db = await this.db
 
