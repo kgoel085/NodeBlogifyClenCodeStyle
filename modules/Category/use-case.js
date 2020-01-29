@@ -1,6 +1,6 @@
 const CRUD = require('./../../services/CRUD')
 const { InvalidParam, UniqueConstraint } = require('./../../helpers/error')
-const { validateObjectId, isArray, isRequired } = require('./../../helpers')
+const { validateObjectId, isArray, isRequired, isType } = require('./../../helpers')
 
 class Category extends CRUD {
   constructor (db = null, schema = null) {
@@ -76,12 +76,12 @@ class Category extends CRUD {
     const returnArr = []
 
     if (id) id = id.toString()
-    let searchQry = { isChild: id, isActive: true }
+    let searchQry = { isChild: id }
 
     // Look for id first, if not child
     if (!isChild && id) {
       const parentId = await this.makeDbId(id)
-      searchQry = { _id: parentId, isActive: true }
+      searchQry = { _id: parentId }
     }
 
     // Fetch data, if present
@@ -107,7 +107,7 @@ class Category extends CRUD {
 
   // Update category
   async updateCategory (obj = {}) {
-    const { _id: categoryId, isChild, ...details } = this.schema(obj)
+    const { _id: categoryId, isChild, isActive, ...details } = this.schema(obj)
     if (!this.checkCategory(categoryId, true)) throw InvalidParam('Provided category is invalid !')
 
     // Check if child is valid or not
@@ -119,6 +119,27 @@ class Category extends CRUD {
     const updateId = await this.makeDbId(categoryId)
     const result = await this.updateOne({ _id: updateId }, { $set: { ...details, isChild } })
     return result
+  }
+
+  // Mark a category as inactive
+  async deleteCategory (usrData = {}) {
+    const { id, disableChild } = usrData
+
+    // Validate values
+    isType('databaseId', id, 'id', true)
+
+    // Check whether to also disable child categories or not
+    let markChild = false
+    if (typeof disableChild !== 'undefined') {
+      isType('boolean', disableChild, 'disableChild', true)
+      markChild = true
+    }
+
+    // Check if category exists or not
+    const { data } = await this.checkCategory(id, true)
+    if (!data) throw new InvalidParam('Invalid category provided !')
+
+    console.log(id, markChild)
   }
 }
 

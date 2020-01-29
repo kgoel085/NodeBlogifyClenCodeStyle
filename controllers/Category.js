@@ -36,5 +36,16 @@ module.exports = {
       .updateCategory(updateData)
       .then(data => res.status(data.statusCode).json(data))
       .catch(err => nxt(err))
+  },
+
+  // Mark category as inactive
+  deleteCategory: async (req, res, nxt) => {
+    const userData = { ...req.params, ...req.body }
+    try {
+      const result = await Category.deleteCategory(userData)
+      console.log(result)
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
