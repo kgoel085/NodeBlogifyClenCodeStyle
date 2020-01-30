@@ -129,7 +129,7 @@ class Category extends CRUD {
     const { id, isActive } = usrData
 
     // Validate values
-    if (!isActive) throw new InvalidParam('isActive is invalid !')
+    if (isActive === null || isActive === 'undefined') throw new InvalidParam('isActive is invalid !')
     isType('databaseId', id, 'id', true)
     isType('boolean', isActive, 'isActive', true)
 
