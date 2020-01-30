@@ -11,7 +11,8 @@ const fields = {
   },
   createdBy: {
     type: 'databaseId',
-    required: true
+    required: true,
+    guarded: true
   },
   isActive: {
     type: 'boolean',
