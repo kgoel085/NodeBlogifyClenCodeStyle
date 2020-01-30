@@ -6,7 +6,7 @@ const { createCategory, getAllCategories, getCategoryById, updateCategory, modif
 router.put('/:id/status', modifyCategoryStatus)
 
 // Update single category
-router.post('/:id', updateCategory)
+router.put('/:id', updateCategory)
 
 // Create category
 router.post('/create', createCategory)
