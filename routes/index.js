@@ -1,7 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const { hasOwnProperty } = require('./../helpers')
-const { isLoggedIn } = require('./../middlewares')
+const { isLoggedIn, checkInputs } = require('./../middlewares')
+
+// Check for inputs
+router.use(checkInputs)
 
 // User routes
 const UserRoutes = require('./user')
@@ -15,36 +17,12 @@ router.use('/category', isLoggedIn, CategoryRoutes)
 const PostRoutes = require('./post')
 router.use('/post', isLoggedIn, PostRoutes)
 
-// Admin routes
-// const AdminRoutes = require('./admin')
-// router.use('/admin', isLoggedIn, AdminRoutes)
+// Error Handling
+const Errors = require('./errors')
+router.use(Errors)
 
 router.get('/', (req, res, nxt) => {
   res.send('Welcome back....!')
 })
 
-// --------------------------- Error Handling
-// *** Not found page
-router.use((req, res, nxt) => {
-  const error = new Error('Not Found !')
-  error.status = 404
-
-  nxt(error)
-})
-
-// *** Unexpected errors
-router.use((error, req, res, nxt) => {
-  res.status(error.statusCode || 500)
-
-  const errorObj = {
-    error: true,
-    message: (hasOwnProperty(error, 'message') && error.message) ? error.message : 'Error Occured !'
-  }
-
-  // If any error data is there
-  if (hasOwnProperty(error, 'data')) errorObj.data = error.data
-
-  // Return error
-  res.json(errorObj)
-})
 module.exports = router
