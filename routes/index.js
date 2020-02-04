@@ -11,6 +11,10 @@ router.use('/user', UserRoutes)
 const CategoryRoutes = require('./category')
 router.use('/category', isLoggedIn, CategoryRoutes)
 
+// Posts routes
+const PostRoutes = require('./post')
+router.use('/post', isLoggedIn, PostRoutes)
+
 // Admin routes
 // const AdminRoutes = require('./admin')
 // router.use('/admin', isLoggedIn, AdminRoutes)

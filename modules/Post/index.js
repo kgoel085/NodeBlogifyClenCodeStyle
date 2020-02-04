@@ -1,5 +1,8 @@
 const schema = require('./schema')
-const Post = require('./use-case')
 const db = require('../../loaders/database')
+const Post = require('./use-case')
 
-module.exports = new Post(db(), schema)
+// Dependencies
+const Category = require('./../Category')
+
+module.exports = new Post(db(), schema, Category)
