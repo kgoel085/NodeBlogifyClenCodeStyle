@@ -28,18 +28,7 @@ class Category extends CRUD {
 
   // Check whether category already exists or not
   async checkCategory (category = false, isId = false) {
-    if (!category) throw new InvalidParam('Category is invalid !')
-    let result
-
-    // If passed argument is a id
-    if (isId) {
-      if (!validateObjectId(category)) throw new InvalidParam('Parent category is invalid !')
-      result = await this.findById(category)
-      return result
-    }
-
-    category = new RegExp('^' + category, 'i')
-    result = await this.findOne({ category })
+    const result = await this.checkForValue(category, 'category', isId, true)
     return result
   }
 
