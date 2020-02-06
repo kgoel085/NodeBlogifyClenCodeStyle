@@ -1,4 +1,4 @@
-const { isArray, isObject, isRequired, hasOwnProperty } = require('../helpers')
+const { isArray, isObject, isRequired, hasOwnProperty, validateObjectId } = require('../helpers')
 const { InvalidParam } = require('../helpers/error')
 const returnResponse = require('./../helpers/responseHandler')
 
@@ -208,6 +208,27 @@ class CRUD {
     } catch (err) {
       return this._returnResponse(500, true, err)
     }
+  }
+
+  // Check value exists or not in collection
+  async checkForValue (val = null, col = null, isId = false, caseSensitivity = false) {
+    let result = null
+    const errMsg = `${col} is invalid !`
+
+    if (val === null || val === 'undefined') throw new InvalidParam(errMsg)
+
+    // If passed argument is a id
+    if (isId) {
+      if (!validateObjectId(val)) throw new InvalidParam(errMsg)
+      result = await this.findById(val)
+      return result
+    }
+
+    if (typeof val === 'string' && caseSensitivity) val = new RegExp('^' + val, 'i')
+    const filterObj = {}
+    filterObj[col] = val
+    result = await this.findOne(filterObj)
+    return result
   }
 
   // ------------------------------ Helpers ---------------------------------- //
