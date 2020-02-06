@@ -9,7 +9,7 @@ class Category extends CRUD {
 
   // Create category
   async createCategory (obj = {}) {
-    obj = this.schema(obj)
+    obj = this.schema(obj, true)
     const { category, isChild } = obj
 
     // Check whether category already exists or not
