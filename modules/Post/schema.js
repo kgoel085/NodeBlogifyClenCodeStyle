@@ -1,4 +1,6 @@
-const Schema = require('./../../services/Schema')
+const { normalizeString } = require('../../helpers')
+const SchemaClass = require('./../../services/Schema')
+
 const fields = {
   name: {
     type: 'string',
@@ -30,5 +32,18 @@ const fields = {
   }
 }
 
-const PostSchema = new Schema(fields)
-module.exports = postObj => PostSchema.validate(postObj)
+const normalizeObj = ({
+  name,
+  ...otherInfo
+} = {}) => {
+  name = normalizeString(name, 1)
+  return {
+    name,
+    ...otherInfo
+  }
+}
+
+const Schema = new SchemaClass(fields)
+Schema.normalizeObject = normalizeObj
+
+module.exports = (postObj, isResponse = false) => Schema.validate(postObj, isResponse)
