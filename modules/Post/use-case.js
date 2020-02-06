@@ -1,6 +1,6 @@
 const CRUD = require('./../../services/CRUD')
 const { UniqueConstraint, InvalidParam } = require('./../../helpers/error')
-const { isType } = require('./../../helpers')
+const { isType, validateObjectId } = require('./../../helpers')
 
 class Post extends CRUD {
   constructor (db = null, schema = null, category = null) {
@@ -23,6 +23,26 @@ class Post extends CRUD {
     await this.validatePostCategories(category)
 
     const result = await this.insert(obj)
+    return result
+  }
+
+  // Get post details by id
+  async getPostById (id = null) {
+    if (!id || !validateObjectId(id)) throw new InvalidParam('Invalid id provided !') // Post id to fetch
+
+    // Post data
+    const result = await this.findById(id)
+    if (!result.data) result.msg = 'No data found !'
+
+    return result
+  }
+
+  // Get all posts assigned to a category
+  async getCategoryPost (categoryId = null) {
+    if (!categoryId || !validateObjectId(categoryId)) throw new InvalidParam('Invalid category provided !') // Post id to fetch
+    await this.validatePostCategories([categoryId])
+
+    const result = await this.findAll({ category: { $all: [[categoryId]] } })
     return result
   }
 
