@@ -15,8 +15,17 @@ module.exports = {
   },
 
   // Get all post for given category
-  getPostByCategory: async (req, res, nxt) => {
+  getPostByCategory: (req, res, nxt) => {
     return Post.getCategoryPost(req.params.id)
+      .then(resp => res.status(resp.statusCode).json(resp))
+      .catch(err => nxt(err))
+  },
+
+  // Update post data
+  updatePostData: async (req, res, nxt) => {
+    const postId = req.params.id
+    const data = { ...req.body, _id: postId }
+    return Post.updatePost(data)
       .then(resp => res.status(resp.statusCode).json(resp))
       .catch(err => nxt(err))
   }
