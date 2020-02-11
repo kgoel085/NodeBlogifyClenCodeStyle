@@ -50,7 +50,9 @@ class Schema {
       }
 
       // Check if correct type is received or not
-      const { required, type, default: defaultVal, valueType } = this.schema[key]
+      let { required, type, default: defaultVal, valueType } = this.schema[key]
+      if (typeof required === 'undefined' || required === null) required = false
+
       if (type) {
         if (required === true) currentVal = isType(type, currentVal, key, true) // Check value if required
         else if (!this.checkForValidDefaultVal(currentVal, key)) { // If value is not present
@@ -59,7 +61,7 @@ class Schema {
         }
 
         // Validate values of the current value if applicable
-        if (valueType) this.validateValueType(valueType, key, currentVal)
+        if (valueType) this.validateValueType(valueType, key, currentVal, required)
 
         validObject[key] = currentVal
       }
@@ -120,8 +122,8 @@ class Schema {
   }
 
   // Validate if value type is correct or not, for array or objects
-  validateValueType (type = null, lbl = null, val = null) {
-    if (isType('array', val, lbl, true)) this.validateArrayValues(type, lbl, val) // Validate array values
+  validateValueType (type = null, lbl = null, val = null, checkVal = true) {
+    if (isType('array', val, lbl, checkVal)) this.validateArrayValues(type, lbl, val) // Validate array values
   }
 
   // Validate if array has the defined value type
