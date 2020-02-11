@@ -18,6 +18,10 @@ router.use('/category', isLoggedIn, CategoryRoutes)
 const PostRoutes = require('./post')
 router.use('/post', isLoggedIn, PostRoutes)
 
+// Tags routes
+const TagRoutes = require('./tag')
+router.use('/tag', isLoggedIn, TagRoutes)
+
 // -------------------------------------------------- Error Handling
 
 // *** Not found page
