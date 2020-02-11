@@ -7,6 +7,13 @@ module.exports = {
       .catch(err => nxt(err))
   },
 
+  // get all posts
+  getAllPost: (req, res, nxt) => {
+    return Post.getAllPost()
+      .then(resp => res.status(resp.statusCode).json(resp))
+      .catch(err => nxt(err))
+  },
+
   // Get post details from id
   getPostById: (req, res, nxt) => {
     return Post.getPostById(req.params.id)

@@ -49,6 +49,12 @@ class Post extends CRUD {
     return result
   }
 
+  // Get all post
+  async getAllPost () {
+    const result = await this.findAll({})
+    return result
+  }
+
   // Get post details by id
   async getPostById (id = null) {
     if (!id || !validateObjectId(id)) throw new InvalidParam('Invalid id provided !') // Post id to fetch
