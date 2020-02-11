@@ -6,11 +6,6 @@ const fields = {
     type: 'string',
     required: true
   },
-  category: {
-    type: 'array',
-    valueType: 'databaseId',
-    default: []
-  },
   createdBy: {
     type: 'databaseId',
     required: true,
