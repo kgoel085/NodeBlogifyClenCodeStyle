@@ -28,24 +28,16 @@ class Post extends CRUD {
 
   // Update post
   async updatePost (obj = {}) {
-    obj = this.schema(obj)
+    const { _id, ...details } = obj
+    isType('databaseId', _id, 'id', true) // Check if a valid database id is provided
 
-    const { isActive, name, category, _id: postId, ...details } = obj
-
-    // Validate name
-    isType('string', name, 'Post name', true)
-    isType('boolean', isActive, 'isActive', true)
-
-    // Validate & check for post id existence
-    const { data } = await this.getPostById(postId)
-    if (!data) throw InvalidParam('Invalid post id provided !')
-
-    // Validate & check for categories
-    await this.validatePostCategories(category)
+    // Get saved data
+    const { data: postData } = await this.getPostById(_id)
 
     // Update data
+    const { _id: postId, ...finalData } = this.schema({ ...postData, ...details }, true)
     const updateId = await this.makeDbId(postId)
-    const result = await this.updateOne({ _id: updateId }, { $set: { name, category, ...details, isActive } })
+    const result = await this.updateOne({ _id: updateId }, { $set: { ...finalData } })
     return result
   }
 

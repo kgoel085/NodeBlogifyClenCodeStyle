@@ -99,17 +99,23 @@ class Category extends CRUD {
 
   // Update category
   async updateCategory (obj = {}) {
-    const { _id: categoryId, isChild, isActive, ...details } = this.schema(obj)
-    if (!this.checkCategory(categoryId, true)) throw InvalidParam('Provided category is invalid !')
+    const { _id: categoryId, isChild, isActive, ...details } = obj
+
+    // Check category
+    isType('databaseId', categoryId, 'id', true)
+    const { data: categoryData } = await this.checkCategory(categoryId, true)
+    if (!categoryData) throw InvalidParam('Provided category is invalid !')
 
     // Check if child is valid or not
     if (isChild) {
-      if (!validateObjectId(isChild) || !this.checkCategory(isChild, true)) throw InvalidParam('Provided child category is invalid !')
+      const { data: childData } = await this.checkCategory(isChild, true)
+      if (!validateObjectId(isChild) || !childData) throw InvalidParam('Provided child category is invalid !')
     }
 
     // Update data
+    const { _id, ...finalData } = this.schema({ ...categoryData, ...details, isChild }, true)
     const updateId = await this.makeDbId(categoryId)
-    const result = await this.updateOne({ _id: updateId }, { $set: { ...details, isChild } })
+    const result = await this.updateOne({ _id: updateId }, { $set: { ...finalData } })
     return result
   }
 
