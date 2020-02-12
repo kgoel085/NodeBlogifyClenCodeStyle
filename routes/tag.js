@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { createTag, getTags, getMatchingTags, getTagById } = require('./../controllers/Tag')
+const { createTag, getTags, getMatchingTags, getTagById, updateTag } = require('./../controllers/Tag')
 
 // Create tag
 router.post('/create', createTag)
@@ -14,5 +14,8 @@ router.get('/search/:qry', getMatchingTags)
 
 // Get tag from an id
 router.get('/:id', getTagById)
+
+// Update tag with an id
+router.put('/:id', updateTag)
 
 module.exports = router

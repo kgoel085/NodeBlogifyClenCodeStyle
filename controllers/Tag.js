@@ -27,5 +27,13 @@ module.exports = {
     return Tag.getTagById(req.params.id)
       .then(resp => res.status(resp.statusCode).json(resp))
       .catch(err => nxt(err))
+  },
+
+  // Update tag by id
+  updateTag: (req, res, nxt) => {
+    const userData = { ...req.body, _id: req.params.id }
+    return Tag.updateTag(userData)
+      .then(resp => res.status(resp.statusCode).json(resp))
+      .catch(err => nxt(err))
   }
 }

@@ -1,6 +1,6 @@
 const CRUD = require('../../services/CRUD')
 const { UniqueConstraint, InvalidParam } = require('../../helpers/error')
-// const { isType } = require('../../helpers')
+const { isType } = require('../../helpers')
 
 class Tag extends CRUD {
   constructor (db = null, schema = null) {
@@ -42,6 +42,21 @@ class Tag extends CRUD {
 
     // Get the tag with id
     const result = await this.checkForValue(id, 'tag', true, false)
+    return result
+  }
+
+  // Update tag by id
+  async updateTag (obj = {}) {
+    const { _id, ...details } = obj
+    isType('databaseId', _id, 'id', true) // Check if provided id is valid or not
+
+    // Get the tag saved data
+    const { data: tagData } = await this.getTagById(_id)
+
+    // Update data
+    const { _id: tagId, ...finalData } = this.schema({ ...tagData, ...details }, true)
+    const updateId = await this.makeDbId(tagId)
+    const result = await this.updateOne({ _id: updateId }, { $set: { ...finalData } })
     return result
   }
 }
