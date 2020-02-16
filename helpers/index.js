@@ -56,6 +56,9 @@ const helpers = {
     return returnVal
   },
 
+  // Make array unique
+  isUniqueArr: (arr = []) => arr.filter((item, i, ar) => ar.indexOf(item) === i),
+
   // Check if is object
   isObject: (varObj, chkLength = false) => {
     let returnVal = false
@@ -79,38 +82,39 @@ const helpers = {
   },
 
   // Check the type of the value
-  isType: (type = false, value = false, lbl = false, checkVal = false) => {
+  isType: (type = false, value = false, lbl = false, checkVal = false, showErr = true) => {
     if (checkVal && !value && type.toLowerCase() !== 'boolean') throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
     switch (type.toLowerCase()) {
       case 'email':
         value = helpers.validateEmail(lbl, value)
         break
       case 'array':
-        if (!helpers.isArray(value, checkVal)) throw new TypeError(`${lbl} should be an array`)
+        if (!helpers.isArray(value, checkVal) && showErr) throw new TypeError(`${lbl} should be an array`)
+        else value = helpers.isUniqueArr(value)
         break
       case 'object':
-        if (!helpers.isObject(value, checkVal)) throw new TypeError(`${lbl} should be an object`)
+        if (!helpers.isObject(value, checkVal) && showErr) throw new TypeError(`${lbl} should be an object`)
         break
       case 'number':
       case 'integer':
-        if (!value.constructor === Number) throw new TypeError(`${lbl} should be a number`)
+        if (!value.constructor === Number && showErr) throw new TypeError(`${lbl} should be a number`)
         break
       case 'float':
       case 'decimal':
-        if (!helpers.isFloat(value)) throw new TypeError(`${lbl} should be a float/decimal value`)
+        if (!helpers.isFloat(value) && showErr) throw new TypeError(`${lbl} should be a float/decimal value`)
         break
       case 'string':
         value = helpers.validateString(lbl, value)
         break
       case 'boolean':
-        if (!value.constructor === Boolean) throw new TypeError(`${lbl} should be a boolean`)
-        if (value !== true && value !== false) throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
+        if (!value.constructor === Boolean && showErr) throw new TypeError(`${lbl} should be a boolean`)
+        if (value !== true && value !== false && showErr) throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
         break
       case 'databaseid':
-        if (!helpers.validateObjectId(value)) throw new TypeError(`${lbl} should be a valid id`)
+        if (!helpers.validateObjectId(value) && showErr) throw new TypeError(`${lbl} should be a valid id`)
         break
       case 'date':
-        if (!helpers.isDate(value)) throw new TypeError(`${lbl} should be a valid date`)
+        if (!helpers.isDate(value) && showErr) throw new TypeError(`${lbl} should be a valid date`)
         value = value.toString()
         break
     }
