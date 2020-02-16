@@ -11,6 +11,11 @@ const fields = {
     required: true,
     valueType: 'databaseId'
   },
+  tags: {
+    type: 'array',
+    default: [],
+    valueType: 'databaseId'
+  },
   createdBy: {
     type: 'databaseId',
     required: true,
