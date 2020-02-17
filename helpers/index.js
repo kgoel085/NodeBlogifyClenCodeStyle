@@ -1,4 +1,6 @@
 const { RequiredParam, InvalidParam } = require('./error')
+const sanitizeHTML = require('sanitize-html')
+
 const helpers = {
   // Check for required variables
   isRequired: param => {
@@ -16,11 +18,11 @@ const helpers = {
   },
 
   // Validate String
-  validateString: (lbl, val = '', len = 2) => {
-    if (!val || typeof val !== 'string') throw new InvalidParam(`${lbl} is invalid`)
-    if (val.length < 2) throw new InvalidParam(`${lbl} length should be at least 2 characters`)
+  validateString: (lbl, val = '', len = 2, showErr = true) => {
+    if ((!val || typeof val !== 'string') && showErr) throw new InvalidParam(`${lbl} is invalid`)
+    if (val.length < 2 && showErr) throw new InvalidParam(`${lbl} length should be at least 2 characters`)
 
-    return val
+    return sanitizeHTML(val)
   },
 
   // Validate Integer
@@ -30,12 +32,12 @@ const helpers = {
   },
 
   // Validate Email
-  validateEmail: (lbl, val = '') => {
+  validateEmail: (lbl, val = '', showErr = true) => {
     // const filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
     const filter = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     if (filter.test(String(val).toLowerCase())) return val
 
-    throw new InvalidParam(`${lbl} is not a valid email`)
+    if (showErr) throw new InvalidParam(`${lbl} is not a valid email`)
   },
 
   // Validate Mongo DB ObjectId
@@ -76,6 +78,32 @@ const helpers = {
     return parseInt(date) && (new Date(date) !== 'Invalid Date') && !isNaN(new Date(date))
   },
 
+  // Check if string is a valid base 64
+  isBase64: str => {
+    if (str instanceof Boolean || typeof str === 'boolean') {
+      return false
+    }
+
+    if (str === '') return false
+
+    let regex = '(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\/]{3}=)?'
+    const mimeRegex = '(data:\\w+\\/[a-zA-Z\\+\\-\\.]+;base64,)'
+
+    regex = mimeRegex + '?' + regex
+
+    return (new RegExp('^' + regex + '$', 'gi')).test(str)
+  },
+
+  // Sanitize & Encode string to a base 64 format
+  encodeBase64: str => {
+    return Buffer.from(sanitizeHTML(str), 'utf-8').toString('base64')
+  },
+
+  // Sanitize & Decode string to a base 64 format
+  decodeBase64: str => {
+    return sanitizeHTML(Buffer.from(str, 'base64').toString('utf-8'))
+  },
+
   // Check if object has a property available
   hasOwnProperty: (obj, key) => {
     return Object.prototype.hasOwnProperty.call(obj, key)
@@ -104,7 +132,7 @@ const helpers = {
         if (!helpers.isFloat(value) && showErr) throw new TypeError(`${lbl} should be a float/decimal value`)
         break
       case 'string':
-        value = helpers.validateString(lbl, value)
+        value = helpers.validateString(lbl, value, 2, showErr)
         break
       case 'boolean':
         if (!value.constructor === Boolean && showErr) throw new TypeError(`${lbl} should be a boolean`)
@@ -116,6 +144,10 @@ const helpers = {
       case 'date':
         if (!helpers.isDate(value) && showErr) throw new TypeError(`${lbl} should be a valid date`)
         value = value.toString()
+        break
+      case 'base64':
+        if (!helpers.isBase64(value) && showErr) throw new TypeError(`${lbl} should be a valid base64 string`)
+        value = helpers.encodeBase64(helpers.decodeBase64(value))
         break
     }
 
