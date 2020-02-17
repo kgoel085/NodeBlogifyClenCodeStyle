@@ -56,10 +56,13 @@ class Post extends CRUD {
     }
 
     // Validate content
-    isType('base64', content, 'content', true)
+    if (content) {
+      isType('base64', content, 'content', true)
+      updateData.content = content
+    }
 
     // Update data
-    const { _id: postId, ...finalData } = this.schema({ ...updateData, ...details, content }, true)
+    const { _id: postId, ...finalData } = this.schema({ ...updateData, ...details }, true)
     const updateId = await this.makeDbId(postId)
     const result = await this.updateOne({ _id: updateId }, { $set: { ...finalData } })
     return result
