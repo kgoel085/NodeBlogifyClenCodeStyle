@@ -14,7 +14,7 @@ class Post extends CRUD {
     obj = this.schema(obj, true)
 
     // Validate values
-    const { name, category, tags } = obj
+    const { name, category, tags, content } = obj
 
     // Validate & check for post name existence
     const { data: nameExists } = await this.checkForValue(name, 'name', false, true)
@@ -26,26 +26,40 @@ class Post extends CRUD {
     // Validate & check for tags
     await this.validatePostTags(tags)
 
+    // Validate content
+    isType('string', content, 'content', true)
+
     const result = await this.insert(obj)
     return result
   }
 
   // Update post
   async updatePost (obj = {}) {
-    const { _id, category, tags, ...details } = obj
+    const { _id, category, tags, content, ...details } = obj
     isType('databaseId', _id, 'id', true) // Check if a valid database id is provided
-
-    // Validate & check for categories
-    await this.validatePostCategories(category)
-
-    // Validate & check for tags
-    await this.validatePostTags(tags)
 
     // Get saved data
     const { data: postData } = await this.getPostById(_id)
 
+    // Validate & check for categories
+    const updateData = { ...postData }
+
+    if (category) {
+      await this.validatePostCategories(category)
+      updateData.category = category
+    }
+
+    // Validate & check for tags
+    if (tags) {
+      await this.validatePostTags(tags)
+      updateData.tags = tags
+    }
+
+    // Validate content
+    isType('base64', content, 'content', true)
+
     // Update data
-    const { _id: postId, ...finalData } = this.schema({ ...postData, ...details, category, tags }, true)
+    const { _id: postId, ...finalData } = this.schema({ ...updateData, ...details, content }, true)
     const updateId = await this.makeDbId(postId)
     const result = await this.updateOne({ _id: updateId }, { $set: { ...finalData } })
     return result
@@ -79,9 +93,8 @@ class Post extends CRUD {
 
   // Validate & check provided categories are valid or not
   async validatePostCategories (catArr = []) {
-    isType('array', catArr, 'category', true)
-
     const returnVal = []
+    if (!isType('array', catArr, 'category', true, false)) return returnVal
     for (const category of catArr) {
       const { data } = await this.category.checkCategory(category, true)
       if (!data) throw new InvalidParam('Invalid category provided !')

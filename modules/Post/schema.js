@@ -11,6 +11,10 @@ const fields = {
     required: true,
     valueType: 'databaseId'
   },
+  content: {
+    type: 'base64',
+    required: true
+  },
   tags: {
     type: 'array',
     default: [],
