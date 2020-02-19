@@ -11,6 +11,10 @@ const fields = {
     required: true,
     valueType: 'databaseId'
   },
+  header: {
+    type: 'dataurl',
+    default: null
+  },
   content: {
     type: 'base64',
     required: true

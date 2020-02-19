@@ -14,7 +14,7 @@ class Post extends CRUD {
     obj = this.schema(obj, true)
 
     // Validate values
-    const { name, category, tags, content } = obj
+    const { name, category, tags, content, header } = obj
 
     // Validate & check for post name existence
     const { data: nameExists } = await this.checkForValue(name, 'name', false, true)
@@ -26,6 +26,9 @@ class Post extends CRUD {
     // Validate & check for tags
     await this.validatePostTags(tags)
 
+    // Validate header
+    if (header) isType('dataurl', header, 'header', true)
+
     // Validate content
     isType('string', content, 'content', true)
 
@@ -35,7 +38,7 @@ class Post extends CRUD {
 
   // Update post
   async updatePost (obj = {}) {
-    const { _id, category, tags, content, ...details } = obj
+    const { _id, category, tags, content, header, ...details } = obj
     isType('databaseId', _id, 'id', true) // Check if a valid database id is provided
 
     // Get saved data
@@ -53,6 +56,12 @@ class Post extends CRUD {
     if (tags) {
       await this.validatePostTags(tags)
       updateData.tags = tags
+    }
+
+    // Validate header
+    if (header) {
+      isType('dataurl', header, 'header', true)
+      updateData.header = header
     }
 
     // Validate content
