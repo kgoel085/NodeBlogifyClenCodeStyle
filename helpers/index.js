@@ -94,6 +94,14 @@ const helpers = {
     return (new RegExp('^' + regex + '$', 'gi')).test(str)
   },
 
+  // Check if string is a valid data url string
+  isDataUrl: str => {
+    const testRegex = /^data:([a-z]+\/[a-z]+(;[a-z\-]+\=[a-z\-]+)?)?(;base64)?,[a-z0-9\!\$\&\'\,\(\)\*\+\,\;\=\-\.\_\~\:\@\/\?\%\s]*$/i
+    if (str instanceof Boolean || typeof str === 'boolean' || str === '') return false
+
+    return !!str.trim().match(testRegex)
+  },
+
   // Sanitize & Encode string to a base 64 format
   encodeBase64: str => {
     return Buffer.from(sanitizeHTML(str), 'utf-8').toString('base64')
@@ -148,6 +156,9 @@ const helpers = {
       case 'base64':
         if (!helpers.isBase64(value) && showErr) throw new TypeError(`${lbl} should be a valid base64 string`)
         value = helpers.encodeBase64(helpers.decodeBase64(value))
+        break
+      case 'dataurl':
+        if (!helpers.isDataUrl(value) && showErr) throw new TypeError(`${lbl} should be a valid base64 data string`)
         break
     }
 
