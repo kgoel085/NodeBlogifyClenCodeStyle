@@ -1,10 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const { isLoggedIn, checkInputs } = require('./../middlewares')
+const { isLoggedIn, checkInputs, globalSetting } = require('./../middlewares')
 const { hasOwnProperty } = require('./../helpers')
 
 // Check for inputs
 router.use(checkInputs)
+
+// Set global vars
+router.use(globalSetting)
 
 // User routes
 const UserRoutes = require('./user')
