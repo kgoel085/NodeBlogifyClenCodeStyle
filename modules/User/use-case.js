@@ -1,5 +1,6 @@
 const CRUD = require('../../services/CRUD')
 const { RequiredParam, InvalidParam, UniqueConstraint } = require('./../../helpers/error')
+const { setNameSpaceItem } = require('./../../helpers')
 
 class User extends CRUD {
   constructor (db, schema, encrypt = null, jwt = null) {
@@ -61,6 +62,9 @@ class User extends CRUD {
     const { success, statusCode, data } = await this.findByCredentials(username, password)
     if (!data || !success || statusCode !== 200) throw new Error('Invalid credentials provided !')
 
+    // Set user under global namespace
+    setNameSpaceItem('user', data)
+
     // Generate token
     const token = this.generateToken({ _id: data._id })
     // data.tokens = data.tokens.concat(token)
@@ -117,7 +121,7 @@ class User extends CRUD {
   // Generate auth token for current user
   generateToken (data = false) {
     if (!data) return false
-    const token = this.token.generate({}, { subject: data._id.toString() })
+    const token = this.token.generate({}, { subject: data._id.toString() }, true) // Generate JWT
     return token
   }
 }

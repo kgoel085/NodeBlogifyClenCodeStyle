@@ -1,13 +1,16 @@
-const cls = require('continuation-local-storage')
 const { globalNamespace } = require('./../config')
+const { hasOwnProperty, resetNameSpace } = require('./../helpers')
+
 module.exports = (req, res, nxt) => {
-  const namespace = cls.getNamespace(globalNamespace || 'reqGlobals')
+  // Request global vars
+  const namespace = globalNamespace || 'reqGlobals'
+  if (!hasOwnProperty(global, namespace)) global[namespace] = {}
 
-  namespace.bindEmitter(req)
-  namespace.bindEmitter(res)
+  // Request IP
+  global[namespace].IP = req.ip
 
-  namespace.run(function () {
-    namespace.set('IP', req.ip)
-    nxt()
-  })
+  // Clear global namespace, when response is sent back
+  res.on('finish', resetNameSpace)
+
+  nxt()
 }
