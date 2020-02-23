@@ -1,7 +1,60 @@
 const { RequiredParam, InvalidParam } = require('./error')
 const sanitizeHTML = require('sanitize-html')
+const { globalNamespace, secret } = require('./../config')
+
+const crypto = require('crypto')
+const ENCRYPTION_KEY = secret // Must be 256 bits (32 characters)
+const IV_LENGTH = 16 // For AES, this is always 16
 
 const helpers = {
+  // Encrypt Data
+  encryptData: (text = null) => {
+    const iv = crypto.randomBytes(IV_LENGTH)
+    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv)
+    let encrypted = cipher.update(text)
+
+    encrypted = Buffer.concat([encrypted, cipher.final()])
+
+    return iv.toString('hex') + ':' + encrypted.toString('hex')
+  },
+
+  // Decrypt Data
+  decryptData: (text = null) => {
+    const textParts = text.split(':')
+    const iv = Buffer.from(textParts.shift(), 'hex')
+    const encryptedText = Buffer.from(textParts.join(':'), 'hex')
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv)
+    let decrypted = decipher.update(encryptedText)
+
+    decrypted = Buffer.concat([decrypted, decipher.final()])
+
+    return decrypted.toString()
+  },
+
+  // Get global namespace
+  getGlobalNamespace: () => global[globalNamespace || 'reqGlobals'],
+
+  // Get global namespace item
+  getNameSpaceItem: item => {
+    if (item !== null && typeof item !== 'undefined' && helpers.getGlobalNamespace()) return helpers.getGlobalNamespace()[item]
+    return null
+  },
+
+  //  Set global namespace item
+  setNameSpaceItem: (key = null, val = null) => {
+    if (key !== null && typeof key !== 'undefined' && typeof val !== 'undefined') {
+      helpers.getGlobalNamespace()[key] = val
+      return helpers.getGlobalNamespace()[key]
+    }
+
+    throw InvalidParam('Invalid key, value pair for namespace !')
+  },
+
+  // Reset global namespace
+  resetNameSpace: () => {
+    delete global[globalNamespace || 'reqGlobals']
+  },
+
   // Check for required variables
   isRequired: param => {
     throw new RequiredParam(param)
@@ -33,11 +86,18 @@ const helpers = {
 
   // Validate Email
   validateEmail: (lbl, val = '', showErr = true) => {
-    // const filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
     const filter = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     if (filter.test(String(val).toLowerCase())) return val
 
     if (showErr) throw new InvalidParam(`${lbl} is not a valid email`)
+  },
+
+  // Validate IP
+  validateIP: (lbl, val = '', showErr = true) => {
+    const filter = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+    if (filter.test(String(val))) return val
+
+    if (showErr) throw new InvalidParam(`${lbl} is not a valid IP`)
   },
 
   // Validate Mongo DB ObjectId
@@ -122,7 +182,10 @@ const helpers = {
     if (checkVal && !value && type.toLowerCase() !== 'boolean') throw new InvalidParam(`${lbl} is invalid`) // Check if value exists or not
     switch (type.toLowerCase()) {
       case 'email':
-        value = helpers.validateEmail(lbl, value)
+        value = helpers.validateEmail(lbl, value, showErr)
+        break
+      case 'ip':
+        value = helpers.validateIP(lbl, value, showErr)
         break
       case 'array':
         if (!helpers.isArray(value, checkVal) && showErr) throw new TypeError(`${lbl} should be an array`)
