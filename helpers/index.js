@@ -1,18 +1,7 @@
 const { RequiredParam, InvalidParam } = require('./error')
 const sanitizeHTML = require('sanitize-html')
-const cls = require('continuation-local-storage')
-const { globalNamespace } = require('./../config')
 
 const helpers = {
-  // Get namespace / item from namespace
-  getNameSpace: (item = null, name = null) => {
-    // if (!namespace || typeof namespace !== 'string') throw new InvalidParam('Please provide a valid namespace to continue')
-    const getNamespace = cls.getNamespace
-    const globalNm = getNamespace((!name) ? globalNamespace || 'reqGlobals' : name)
-
-    return (globalNm.get(item)) ? globalNm.get(item) : globalNm
-  },
-
   // Check for required variables
   isRequired: param => {
     throw new RequiredParam(param)
