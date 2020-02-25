@@ -3,7 +3,7 @@ const SchemaClass = require('./../../services/Schema')
 const fields = {
   user: {
     required: true,
-    type: 'string'
+    type: 'databaseId'
   },
   identifier: {
     required: true,
