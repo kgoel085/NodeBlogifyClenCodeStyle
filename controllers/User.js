@@ -22,5 +22,17 @@ module.exports = {
     } catch (err) {
       nxt(err)
     }
+  },
+
+  // Refresh Token
+  refreshToken: async (req, res, nxt) => {
+    try {
+      const { refreshToken } = req.body
+      const { token, statusCode, success, ...data } = await User.refreshToken(refreshToken)
+      if (!success || !token) throw new Error('Error while processing token !')
+      return res.status(statusCode).json({ ...data, token, success })
+    } catch (err) {
+      nxt(err)
+    }
   }
 }

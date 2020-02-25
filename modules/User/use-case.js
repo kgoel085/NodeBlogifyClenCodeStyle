@@ -1,6 +1,6 @@
 const CRUD = require('../../services/CRUD')
 const { RequiredParam, InvalidParam, UniqueConstraint } = require('./../../helpers/error')
-const { setNameSpaceItem } = require('./../../helpers')
+const { setNameSpaceItem, decryptData } = require('./../../helpers')
 
 class User extends CRUD {
   constructor (db, schema, encrypt = null, jwt = null) {
@@ -66,12 +66,32 @@ class User extends CRUD {
     setNameSpaceItem('user', data)
 
     // Generate token
-    const token = this.generateToken({ _id: data._id })
-    // data.tokens = data.tokens.concat(token)
-
-    await this.updateOne({ _id: data._id }, { $set: { ...data } })
+    const token = await this.generateToken({ _id: data._id }, true)
+    // await this.updateOne({ _id: data._id }, { $set: { ...data } })
 
     return { success, statusCode, token, msg: 'User verified' }
+  }
+
+  // Refresh token
+  async refreshToken (refreshToken = null) {
+    if (!refreshToken) throw new InvalidParam('Refresh token is invalid !')
+
+    // Decrypted data from token
+    const decryptedData = decryptData(refreshToken)
+    if (!decryptedData) throw new InvalidParam('Invalid refresh token provided !')
+
+    // Converted data from decrypted data
+    const dataArr = JSON.parse(decryptedData)
+
+    // Check whether identifier is valid or not
+    const tokenUser = await this.token.checkRefreshToken(dataArr)
+    const { data: UserData } = await this.findById(tokenUser)
+
+    if (!tokenUser || !UserData) throw new InvalidParam('Invalid refresh token !')
+
+    // Generate token
+    const token = await this.generateToken({ _id: UserData._id })
+    return { success: true, statusCode: 200, token, msg: 'Token refreshed' }
   }
 
   // --------------------------------------------------------- //
@@ -119,9 +139,9 @@ class User extends CRUD {
   }
 
   // Generate auth token for current user
-  generateToken (data = false) {
+  async generateToken (data = false, getRefreshCode = false) {
     if (!data) return false
-    const token = this.token.generate({}, { subject: data._id.toString() }, true) // Generate JWT
+    const token = await this.token.generate({}, { subject: data._id.toString() }, getRefreshCode) // Generate JWT
     return token
   }
 }
