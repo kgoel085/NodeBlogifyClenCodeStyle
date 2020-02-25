@@ -1,7 +1,8 @@
 module.exports = {
   PORT: 3000,
   secret: '5n3GPA5WUHXgcm4N2FnP6f3UY5aQexLP',
-  expiryTime: '60m', // In Minutes or Formatted string -- 1h, 15m
+  expiryTime: '10m', // In Minutes or Formatted string -- 1h, 15m
+  tokenExpiryTime: 60, // In days [ Long lived tokens expiry time ]
   globalNamespace: 'reqGlobals',
   DB: {
     USERNAME: 'kgoel085',
